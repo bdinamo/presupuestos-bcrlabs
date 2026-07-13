@@ -248,13 +248,18 @@
 <script>
 document.getElementById('btn-diagnostico').addEventListener('click', async function(){
   try{
-    const token = await getGraphToken(); // usa la función que ya está en tu archivo
-    const shareUrl = "u!aHR0cHM6Ly9iY3Iuc2hhcmVwb2ludC5jb20vOng6L3MvcHJ1ZWJhYXNkc2Fhc2QvSVFERTNZeEdLclJKVExwZ1FkaDU2Q0h0QWZQQ1FheVBWSnFkVGhoaTBDekt5eXc_ZT1sZEdlSFk";
-    const res = await fetch(`https://graph.microsoft.com/v1.0/shares/${shareUrl}/driveItem`, {
+    const token = await getGraphToken();
+    const path = "/sites/bcr.sharepoint.com,7e9b8a07-c82d-4ebe-938e-392bb28feac4,00027a0a-4d74-414c-a443-b7f04db0b146/drive/root:/PresupuestosBCRlabs/Presupuestos.xlsx";
+    const res = await fetch(`https://graph.microsoft.com/v1.0${path}`, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await res.json();
-    alert("item-id: " + data.id + "\nsite-id: " + (data.parentReference ? data.parentReference.siteId : "no encontrado"));
+    if(data.error){
+      alert("Error de Graph: " + data.error.code + " - " + data.error.message);
+      console.error(data);
+      return;
+    }
+    alert("item-id: " + data.id);
     console.log(data);
   }catch(e){
     alert("Error: " + e.message);
