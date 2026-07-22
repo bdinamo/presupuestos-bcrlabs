@@ -242,31 +242,6 @@
 </head>
 <body>
 <div id="app"></div>
-<button id="btn-diagnostico" style="position:fixed;bottom:10px;right:10px;z-index:9999;padding:8px 12px;background:#dc2626;color:white;border:none;border-radius:6px;cursor:pointer;">
-  Diagnóstico Graph
-</button>
-<script>
-document.getElementById('btn-diagnostico').addEventListener('click', async function(){
-  try{
-    const token = await getGraphToken();
-    const path = "/sites/bcr.sharepoint.com,7e9b8a07-c82d-4ebe-938e-392bb28feac4,00027a0a-4d74-414c-a443-b7f04db0b146/drive/root:/PresupuestosBCRlabs/Presupuestos.xlsx";
-    const res = await fetch(`https://graph.microsoft.com/v1.0${path}`, {
-      headers: { "Authorization": `Bearer ${token}` }
-    });
-    const data = await res.json();
-    if(data.error){
-      alert("Error de Graph: " + data.error.code + " - " + data.error.message);
-      console.error(data);
-      return;
-    }
-    alert("item-id: " + data.id);
-    console.log(data);
-  }catch(e){
-    alert("Error: " + e.message);
-    console.error(e);
-  }
-});
-</script>
 <script>
 const msalConfig = {
   auth: {
@@ -278,8 +253,8 @@ const msalConfig = {
 };
 const msalInstance = new msal.PublicClientApplication(msalConfig);
 const GRAPH_SCOPES = ["Files.ReadWrite"];
-const SITE_ID = "bcr.sharepoint.com,7e9b8a07-c82d-4ebe-938e-392bb28feac4,00027a0a-4d74-414c-a443-b7f04db0b146";
-const ITEM_ID = "TU_ITEM_ID";
+const SITE_ID = "bcr.sharepoint.com,a5ad8297-0dcc-409d-84c1-1498c58bfb98,1413f63e-b9aa-420b-aaf5-3d5c0c3c8eee";
+const ITEM_ID = "01L4DNDS6E3WGEMKVUJFGLUYCB3B46QIPN";
 
 async function ensureLogin(){
   const accounts = msalInstance.getAllAccounts();
