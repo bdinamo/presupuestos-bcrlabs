@@ -1736,7 +1736,13 @@ const CATEGORIAS_SELECTOR=[
   {cat:"Otros",mats:["Fumigante", "Metilato de sodio", "Metanol", "Ácido fosfórico", "Hidróxido de sodio", "Ácido clorhídrico", "Premezcla", "Nucleos vitamínicos", "Café", "Remolacha", "Otros productos", "Levadura", "Gomas", "Ajo", "Ácidos grasos", "Óxido de magnesio", "Coriandro", "Tejido vegetal", "Hisopado", "Glucosa", "Maltosa", "Fructosa", "Jarabe de mezcla", "Maltodextrina", "Borra de girasol", "Borra de soja", "Legumbres", "Barrido de planta", "Enzimas"]}
 ];
 const getE=id=>id?EN_ALL.find(e=>e.id===Number(id)):null;
-const rowT=r=>{var p=0;if(r.precioManual!=null){p=r.precioManual;}else{const e=getE(r.eid);if(!e&&!r.fueraLeo)return 0;var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';p=r.gm_precio!==undefined?r.gm_precio:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0);}return r.cant?p*r.cant*(1-(r.bonif||0)/100):0;};
+function unitPriceNow(r,tarifa){
+  if(r.precioManual!=null) return r.precioManual;
+  const e=getE(r.eid);
+  if(!e&&!r.fueraLeo) return 0;
+  return r.gm_precio!==undefined?r.gm_precio:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0);
+}
+const rowT=r=>{var p=0;if(r.precioManual!=null){p=r.precioManual;}else if(r.precioCongelado!=null){p=r.precioCongelado;}else{const e=getE(r.eid);if(!e&&!r.fueraLeo)return 0;var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';p=r.gm_precio!==undefined?r.gm_precio:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0);}return r.cant?p*r.cant*(1-(r.bonif||0)/100):0;};
 const GM_CODIGO_ROJO=26857;
 const docTotal=doc=>{var sub=(doc.rows||[]).reduce((s,r)=>s+rowT(r),0);return sub*(1-doc.bonifG/100)+(doc.codigoRojo?GM_CODIGO_ROJO:0);};
 const efectEst=doc=>doc.estado;
@@ -3139,8 +3145,7 @@ function renderForm(){
               :(row.esDeriv
                 ?'<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">🔁 Derivado</span>'
                 :'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:#fee2e2;color:#991b1b;border:1px solid #f87171;white-space:nowrap;">✗ Fuera</span>');
-            var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';var pUnit=row.precioManual!=null?row.precioManual:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0);
-            return`<tr style="${row.fueraLeo?'background:#fff8f8;':''}">
+            var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';var pUnit=row.precioCongelado!=null?row.precioCongelado:(row.precioManual!=null?row.precioManual:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0));
               <td><span class="rn">${i+1}</span></td>
               <td><div style="font-size:11px;color:#1d3557;font-weight:500;padding:3px 4px;">${row.mat1||'—'}</div></td>
               <td>${e
@@ -3212,8 +3217,7 @@ function renderForm(){
               var e=getE(row.eid);
               var tec=row.tec||(e?e.t:'');
               var t=rowT(row);
-              var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';var pUnit=row.precioManual!=null?row.precioManual:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0);
-              var sinPrecio=row.precioManual==null;
+              var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';var pUnit=row.precioCongelado!=null?row.precioCongelado:(row.precioManual!=null?row.precioManual:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0));
               var muestra=e?resolverMuestra(e.m,row.mat1||''):'—';
               return '<tr style="background:#fff8f8;">'
                 +'<td style="padding:4px 6px;text-align:center;">'+(i+1)+'</td>'
@@ -3536,6 +3540,11 @@ async function saveDoc(){
   }
 
   var doc=JSON.parse(JSON.stringify(APP.form));
+  (doc.rows||[]).forEach(function(r){
+    if(r.precioManual==null){
+      r.precioCongelado=unitPriceNow(r,doc.tarifa||'leo');
+    }
+  });
   doc.updatedAt=new Date().toISOString();
   if(APP.editId){
     var existing=APP.docs.find(function(d){return d.id===APP.editId;});
