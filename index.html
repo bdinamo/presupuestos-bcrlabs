@@ -3146,6 +3146,7 @@ function renderForm(){
                 ?'<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">🔁 Derivado</span>'
                 :'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:#fee2e2;color:#991b1b;border:1px solid #f87171;white-space:nowrap;">✗ Fuera</span>');
             var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';var pUnit=row.precioCongelado!=null?row.precioCongelado:(row.precioManual!=null?row.precioManual:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0));
+            return`<tr style="${row.fueraLeo?'background:#fff8f8;':''}">
               <td><span class="rn">${i+1}</span></td>
               <td><div style="font-size:11px;color:#1d3557;font-weight:500;padding:3px 4px;">${row.mat1||'—'}</div></td>
               <td>${e
@@ -3218,6 +3219,7 @@ function renderForm(){
               var tec=row.tec||(e?e.t:'');
               var t=rowT(row);
               var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';var pUnit=row.precioCongelado!=null?row.precioCongelado:(row.precioManual!=null?row.precioManual:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0));
+              var sinPrecio=row.precioManual==null;
               var muestra=e?resolverMuestra(e.m,row.mat1||''):'—';
               return '<tr style="background:#fff8f8;">'
                 +'<td style="padding:4px 6px;text-align:center;">'+(i+1)+'</td>'
