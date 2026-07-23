@@ -2257,7 +2257,7 @@ async function deleteDocRemote(id){
   const rowsResp = await graphFetch(`${BASE}/tables('TablaPresupuestos')/rows`);
   const idx = rowsResp.value.findIndex(r => r.values[0][0] === id);
   if(idx !== -1){
-    await graphFetch(`${BASE}/tables('TablaPresupuestos')/rows/itemAt(index=${idx})/delete`, { method: "POST" });
+    await graphFetch(`${BASE}/tables('TablaPresupuestos')/rows/$/itemAt(index=${idx})`, { method: "DELETE" });
   }
 }
 
@@ -2266,7 +2266,7 @@ async function saveApprovers(){
   // Estrategia simple: recrear la tabla completa (alcanza, es una lista corta)
   const rowsResp = await graphFetch(`${BASE}/tables('TablaAprobadores')/rows`);
   for(let i = rowsResp.value.length - 1; i >= 0; i--){
-    await graphFetch(`${BASE}/tables('TablaAprobadores')/rows/itemAt(index=${i})/delete`, { method: "POST" });
+    await graphFetch(`${BASE}/tables('TablaAprobadores')/rows/$/itemAt(index=${i})`, { method: "DELETE" });
   }
   for(const nombre of APP.approvers){
     await graphFetch(`${BASE}/tables('TablaAprobadores')/rows/add`, {
@@ -3425,9 +3425,9 @@ function bindForm(){
   document.getElementById('toggle-static')&&document.getElementById('toggle-static').addEventListener('click',function(){APP.ui.showStatic=!APP.ui.showStatic;render();});
   document.getElementById('toggle-mgr')&&document.getElementById('toggle-mgr').addEventListener('click',function(){APP.ui.showMgr=!APP.ui.showMgr;render();});
   document.getElementById('toggle-log')&&document.getElementById('toggle-log').addEventListener('click',function(){APP.ui.showLog=!APP.ui.showLog;render();});
-  document.getElementById('add-apv')&&document.getElementById('add-apv').addEventListener('click',function(){var inp=document.getElementById('new-apv');var v=(inp?inp.value:'').trim();if(v&&!APP.approvers.includes(v)){APP.approvers=[...APP.approvers,v].sort(function(a,b){return a.localeCompare(b,'es');});APP.ui.newApv='';saveApprovers();render();}});
+  document.getElementById('add-apv')&&document.getElementById('add-apv').addEventListener('click',function(){var inp=document.getElementById('new-apv');var v=(inp?inp.value:'').trim();if(v&&!APP.approvers.includes(v)){APP.approvers=[...APP.approvers,v].sort(function(a,b){return a.localeCompare(b,'es');});APP.ui.newApv='';saveApprovers().catch(function(e){console.error('Error al guardar responsable en SharePoint:',e);alert('No se pudo guardar en SharePoint.');});render();}});
   document.getElementById('new-apv')&&document.getElementById('new-apv').addEventListener('input',function(e){APP.ui.newApv=e.target.value;});
-  document.querySelectorAll('[data-da]').forEach(function(b){b.addEventListener('click',function(){APP.approvers=APP.approvers.filter(function(_,i){return i!=Number(b.dataset.da);});saveApprovers();render();});});
+  document.querySelectorAll('[data-da]').forEach(function(b){b.addEventListener('click',function(){APP.approvers=APP.approvers.filter(function(_,i){return i!=Number(b.dataset.da);});saveApprovers().catch(function(e){console.error('Error al guardar responsable en SharePoint:',e);alert('No se pudo guardar en SharePoint.');});render();});});
   document.querySelectorAll('[data-sign]').forEach(function(b){b.addEventListener('click',function(){recordSig(b.dataset.sign);});});
 }
 
