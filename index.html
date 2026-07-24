@@ -3139,7 +3139,7 @@ function renderForm(){
             var e=getE(row.eid),items=e?splitA(e.a):[],t=rowT(row);
             var tec=row.tec||(e?e.t:'');
             var muestra=e?resolverMuestra(e.m, row.mat1||''):'—';
-            var enLeo=e&&!row.fueraLeo;
+            var enLeo=doc.tipo==='PR'?!row.fueraLeo:(e&&!row.fueraLeo);
             var leoBadge=enLeo
               ?'<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:#d1fae5;color:#065f46;border:1px solid #34d399;">✓ LEO</span>'
               :(row.esDeriv
