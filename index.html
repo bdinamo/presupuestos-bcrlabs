@@ -3324,7 +3324,8 @@ function renderForm(){
     <div class="pie-seccion">INFORMACIÓN PARA RECEPCIÓN / ENVÍO DE MUESTRAS</div>
     <div class="pie-bloque">
       <p><strong>SOLICITUD DE ENSAYOS:</strong> Las muestras deben estar acompañadas de la solicitud de ensayo correspondiente.</p>
-      <p><strong>ENVÍO Y RECEPCIÓN DE MUESTRAS:</strong> Las muestras deberán ser enviadas o entregadas personalmente en Córdoba 1402 (Recepción de BCRlabs) en el horario de 8 a 17 h.</p>
+      <p><strong>ENVÍO Y RECEPCIÓN DE MUESTRAS:</strong> Las muestras deberán ser enviadas o entregadas personalmente en 
+	  (Recepción de BCRlabs) en el horario de 8 a 17 h.</p>
       <p>Estacionamiento gratuito de 1/2 hora de cortesía en la cochera de la Bolsa de Comercio de Rosario, ubicada en Santa Fe 1447, de la ciudad de Rosario.</p>
       <p>Servicio de envío por Correo Argentino gratuito desde cualquier punto geográfico del país: <a href="https://www.bcr.com.ar/es/servicios/laboratorios-bcr/sobre-los-laboratorios/servicio-de-envio-gratuito-de-muestras" target="_blank" style="color:#42A9B8;">Ver más</a></p>
       <p>La propuesta de servicio se considerará aprobada con la aceptación vía e-mail por parte del cliente.</p>
@@ -3336,7 +3337,7 @@ function renderForm(){
       <p>BOLSA DE COMERCIO DE ROSARIO ASOCIACIÓN CIVIL &nbsp;—&nbsp; CUIT: 30-52641408-6</p>
       <p>CBU N° 4310001322100000000016</p>
       <p style="margin-top:6px;">Para aquellos clientes que NO disponen de cuenta corriente, BCRlabs emitirá el informe de ensayos cuando se encuentre abonado.</p>
-      <p>La presente propuesta deberá ser revisada si dentro de la vigencia de la misma se producen modificaciones en la variación en el Índice de Precios al Consumidor (IPC) mayor al 3% y/o variación en el tipo de cambio mayor a U$D 1 = $ 1500.</p>
+      <p>La presente propuesta deberá ser revisada si dentro de la vigencia de la misma se producen modificaciones en la variación en el Índice de Precios al Consumidor (IPC) mayor al 3% y/o variación en el tipo de cambio mayor a U$D 1 = $ 1550.</p>
       <p>Vencida la vigencia del presente documento BCRlabs se reserva el derecho de modificar los precios sin previo aviso.</p>
       <p>La solicitud del servicio de Código Rojo (urgencia) implicará un cargo adicional correspondiente al valor vigente del mismo, por cada muestra.</p>
       <p>Toda solicitud de ensayo vinculada a esta RPOC puede incluir ensayos del LEO, sin implicar una nueva versión, aplicando las mismas bonificaciones establecidas.</p>
@@ -3686,7 +3687,7 @@ function generarPDF(){
     +(doc.diasEntrega?'<div class="franja">TIEMPO DE ENTREGA DE RESULTADOS</div><div class="pie-bloque"><p>Entrega total: <strong>'+doc.diasEntrega+'</strong> días hábiles desde la recepción de las muestras y la solicitud de ensayos con la información requerida.</p><p style="font-size:9px;color:#374151;">Tiempo de entrega estimado. Puede variar conforme a la demanda operativa al momento de la recepción.</p></div>':'')
     +'<div class="franja">INFORMACIÓN PARA RECEPCIÓN / ENVÍO DE MUESTRAS</div>'
     +'<div class="pie-bloque"><p><strong>SOLICITUD DE ENSAYOS:</strong> Las muestras deben estar acompañadas de la solicitud de ensayo correspondiente.</p>'
-    +'<p><strong>ENVÍO Y RECEPCIÓN:</strong> Las muestras deben ser enviadas o entregadas personalmente en Córdoba 1402 (BCRlabs) en el horario de 8 a 17 h.</p>'
+    +'<p><strong>ENVÍO Y RECEPCIÓN:</strong> Las muestras deben ser enviadas o entregadas personalmente en AV Jorge Newbery 7643- S2006- Rosario, Santa Fe (BCRlabs) en el horario de 8 a 17 h.</p>'
     +'<p>Estacionamiento gratuito de 1/2 hora de cortesía en la cochera de la Bolsa de Comercio de Rosario, Santa Fe 1447.</p>'
     +'<p>Servicio de envío por Correo Argentino gratuito desde cualquier punto geográfico del país.</p>'
     +'<p>La propuesta de servicio se considerará aprobada con la aceptación vía e-mail por parte del cliente.</p></div>'
@@ -3694,7 +3695,7 @@ function generarPDF(){
     +'<div class="pie-bloque"><p><strong>Transferencia bancaria</strong> | BANCO COINAG S.A. | Cuenta Corriente</p>'
     +'<p>BOLSA DE COMERCIO DE ROSARIO ASOCIACIÓN CIVIL — CUIT: 30-52641408-6 — CBU N° 4310001322100000000016</p>'
     +'<p>Para clientes sin cuenta corriente, BCRlabs emitirá el informe cuando se encuentre abonado.</p>'
-    +'<p>La propuesta deberá revisarse si el IPC varía más del 3% y/o el tipo de cambio supera USD 1 = $ 1500.</p>'
+    +'<p>La propuesta deberá revisarse si el IPC varía más del 3% y/o el tipo de cambio supera USD 1 = $ 1550.</p>'
     +'<p>Vencida la vigencia, BCRlabs se reserva el derecho de modificar los precios sin previo aviso.</p>'
     +(doc.codigoRojo?'<p>La solicitud del servicio de Código Rojo implicará un cargo adicional por cada muestra.</p>':'')
     +'</div>'
@@ -4122,9 +4123,9 @@ function renderKPI(){
   });
   var mesesArr=Object.entries(meses).sort(function(a,b){return a[0].localeCompare(b[0]);});
 
-  // Ensayos fuera de LEO más solicitados
+  // Ensayos fuera de LEO más solicitados (se excluyen los RPOC importados masivamente)
   var ensayosFuera={};
-  filtered.forEach(function(d){
+  filtered.filter(function(d){return !d.archivoOrigen;}).forEach(function(d){
     (d.rows||[]).filter(function(r){return r.fueraLeo;}).forEach(function(r){
       var k=r.nombreLibre||'?';
       if(!ensayosFuera[k])ensayosFuera[k]={cant:0,valor:0,matrices:new Set()};
