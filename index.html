@@ -2430,10 +2430,11 @@ function ensayoFueraLeoExiste(mat,ens){
     });
   });
 }
-async function agregarEnsayoFueraLeoSiNoExiste(mat,ens,tec){
+async function agregarEnsayoFueraLeoSiNoExiste(mat,ens,tec,derivante){
   if(!mat||!ens) return;
   if(ensayoFueraLeoExiste(mat,ens)) return;
   var CLS_SIN_CLASIFICAR='Sin clasificar', GRP_SIN_CLASIFICAR='Sin clasificar';
+  derivante=(derivante||'').trim();
   // Actualiza en memoria para que aparezca ya mismo en el catálogo de esta sesión
   var clsObj=BIB_FUERA_LEO.find(function(c){return c.cls===CLS_SIN_CLASIFICAR;});
   if(!clsObj){clsObj={cls:CLS_SIN_CLASIFICAR,mats:[]};BIB_FUERA_LEO.push(clsObj);}
@@ -2441,11 +2442,11 @@ async function agregarEnsayoFueraLeoSiNoExiste(mat,ens,tec){
   if(!matObj){matObj={m:mat,grps:[]};clsObj.mats.push(matObj);}
   var grpObj=matObj.grps.find(function(g){return g.g===GRP_SIN_CLASIFICAR;});
   if(!grpObj){grpObj={g:GRP_SIN_CLASIFICAR,ens:[]};matObj.grps.push(grpObj);}
-  grpObj.ens.push({e:ens,t:tec||'',p:null});
+  grpObj.ens.push({e:ens,t:tec||'',p:null,d:derivante});
   // Guarda en SharePoint (silencioso: si falla, no interrumpe el guardado del presupuesto)
   try{
     await graphFetch(`${BASE}/tables('TablaEnsayosFueraLEO')/rows/add`, {
-      method: "POST", body: JSON.stringify({ values: [[CLS_SIN_CLASIFICAR, mat, GRP_SIN_CLASIFICAR, ens, tec||'', '', '']] })
+      method: "POST", body: JSON.stringify({ values: [[CLS_SIN_CLASIFICAR, mat, GRP_SIN_CLASIFICAR, ens, tec||'', '', derivante]] })
     });
   }catch(e){
     console.error('Error al sumar ensayo nuevo a TablaEnsayosFueraLEO:', e);
@@ -4281,7 +4282,7 @@ function openModalFueraLeo(){
       header='<span style="font-size:11px;color:rgba(255,255,255,.7);">'+selMat+' › </span><span style="font-size:12px;">'+selGrp+'</span>';
       list=(grpObj.ens||[]).slice().sort(function(a,b){return a.e.localeCompare(b.e,'es');}).map(function(en){
         var ya=isSel(selMat,en.e);
-        var nombreConDerivante=en.e+(en.d?' ('+en.d+')':'');
+        var nombreConDerivante=en.e;
         return '<div class="modal-mat-item fl-ens-item'+(ya?' modal-ya-sel':'')+'" data-ens-e="'+encodeURIComponent(en.e)+'" data-ens-t="'+encodeURIComponent(en.t)+'" data-ens-p="'+(en.p!=null?en.p:'')+'" data-ens-d="'+encodeURIComponent(en.d||'')+'" style="padding:9px 16px;border-bottom:1px solid #f3f4f6;cursor:pointer;background:'+(ya?'#f0fdf4':'#fff')+'">'
           +'<div style="font-size:11px;font-weight:500;color:#111827;pointer-events:none;">'+nombreConDerivante+(ya?'<span class="modal-ya-badge"> ✓ seleccionado — clic para quitar</span>':'')+'</div>'
           +'<div style="font-size:10px;color:#6b7280;margin-top:1px;pointer-events:none;">'+en.t+'</div>'
@@ -4297,6 +4298,7 @@ function openModalFueraLeo(){
         +'<div style="grid-column:1/-1;"><label style="font-size:10px;color:#6b7280;display:block;margin-bottom:2px;">Matriz</label><input id="fl-mat" class="f" style="width:100%;font-size:11px;" placeholder="Ej: Harina de soja" value="'+(selMat||'')+'"></div>'
         +'<div style="grid-column:1/-1;"><label style="font-size:10px;color:#6b7280;display:block;margin-bottom:2px;">Ensayo</label><input id="fl-ens-n" class="f" style="width:100%;font-size:11px;" placeholder="Nombre del ensayo"></div>'
         +'<div style="grid-column:1/-1;"><label style="font-size:10px;color:#6b7280;display:block;margin-bottom:2px;">Técnica</label><input id="fl-tec" class="f" style="width:100%;font-size:11px;" placeholder="Técnica analítica"></div>'
+        +'<div style="grid-column:1/-1;"><label style="font-size:10px;color:#6b7280;display:block;margin-bottom:2px;">Laboratorio derivante (opcional)</label><input id="fl-derivante" class="f" style="width:100%;font-size:11px;" placeholder="Ej: Nofalab"></div>'
         +'<div><label style="font-size:10px;color:#6b7280;display:block;margin-bottom:2px;">Cant.</label><input id="fl-cant" class="f" type="number" min="1" value="1" style="width:100%;font-size:11px;"></div>'
         +'<div><label style="font-size:10px;color:#6b7280;display:block;margin-bottom:2px;">Bonif. %</label><input id="fl-bon" class="f" type="number" min="0" max="100" value="0" style="width:100%;font-size:11px;"></div>'
         +'<div style="grid-column:1/-1;"><label style="font-size:10px;color:#f59e0b;font-weight:600;display:block;margin-bottom:2px;">⚠ Precio unitario</label><input id="fl-precio" class="f" type="number" min="0" value="0" style="width:100%;font-size:11px;border-color:#fbbf24;background:#fffbeb;"></div>'
@@ -4341,7 +4343,7 @@ function openModalFueraLeo(){
       selFuera.forEach(function(s){
         var r=mkRow();
         r.mat1=s.mat;r.matriz=s.mat;
-        r.nombreLibre=s.ens+(s.derivante?' ('+s.derivante+')':'');r.tec=s.tec;r.cant=1;
+        r.nombreLibre=s.ens;r.tec=s.tec;r.cant=1;
         r.muestraLibre='';r.bonif=0;r.precioManual=(s.precio!=null&&!isNaN(s.precio))?s.precio:0;
         r.fueraLeo=true;r.esDeriv=false;r.eid=null;
         APP.form.rows.push(r);
@@ -4379,6 +4381,7 @@ function openModalFueraLeo(){
       var mat=document.getElementById('fl-mat').value.trim();
       var ensN=document.getElementById('fl-ens-n').value.trim();
       var tec=document.getElementById('fl-tec').value.trim();
+      var derivManual=document.getElementById('fl-derivante').value.trim();
       var cant=parseInt(document.getElementById('fl-cant').value)||1;
       var mues=document.getElementById('fl-mues').value.trim();
       var bon=parseInt(document.getElementById('fl-bon').value)||0;
@@ -4390,7 +4393,7 @@ function openModalFueraLeo(){
       r.muestraLibre=mues;r.bonif=bon;r.precioManual=precio;
       r.fueraLeo=true;r.esDeriv=false;r.eid=null;
       APP.form.rows.push(r);
-      agregarEnsayoFueraLeoSiNoExiste(mat,ensN,tec);
+      agregarEnsayoFueraLeoSiNoExiste(mat,ensN,tec,derivManual);
       render();
       ov.remove();
       return;
