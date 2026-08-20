@@ -2392,18 +2392,18 @@ async function loadStorage(){
     return {role:v[0], name:v[1], ts:v[2], tipo:v[3], numero:v[4], version:v[5], cliente:v[6]};
   });
 
-  // TablaEnsayosFueraLEO: columnas Clasificacion, Matriz, Grupo, Ensayo, Tecnica, Precio
-  // Se reconstruye la jerarquía cls -> mats -> m -> grps -> g -> ens -> {e,t,p} que espera el modal
+  // TablaEnsayosFueraLEO: columnas Clasificacion, Matriz, Grupo, Ensayo, Tecnica, Precio, Derivante
+  // Se reconstruye la jerarquía cls -> mats -> m -> grps -> g -> ens -> {e,t,p,d} que espera el modal
   const clsMap = new Map();
   fueraLeo.value.forEach(r => {
     const v = r.values[0];
-    const cls = v[0], mat = v[1], grp = v[2], ens = v[3], tec = v[4], precio = v[5];
+    const cls = v[0], mat = v[1], grp = v[2], ens = v[3], tec = v[4], precio = v[5], derivante = v[6];
     if(!clsMap.has(cls)) clsMap.set(cls, new Map());
     const matsMap = clsMap.get(cls);
     if(!matsMap.has(mat)) matsMap.set(mat, new Map());
     const grpsMap = matsMap.get(mat);
     if(!grpsMap.has(grp)) grpsMap.set(grp, []);
-    grpsMap.get(grp).push({e: ens, t: tec, p: (precio===''||precio==null)?null:precio});
+    grpsMap.get(grp).push({e: ens, t: tec, p: (precio===''||precio==null)?null:precio, d: (derivante||'').trim()});
   });
   BIB_FUERA_LEO = Array.from(clsMap.entries()).map(([cls, matsMap]) => ({
     cls,
@@ -2445,7 +2445,7 @@ async function agregarEnsayoFueraLeoSiNoExiste(mat,ens,tec){
   // Guarda en SharePoint (silencioso: si falla, no interrumpe el guardado del presupuesto)
   try{
     await graphFetch(`${BASE}/tables('TablaEnsayosFueraLEO')/rows/add`, {
-      method: "POST", body: JSON.stringify({ values: [[CLS_SIN_CLASIFICAR, mat, GRP_SIN_CLASIFICAR, ens, tec||'', '']] })
+      method: "POST", body: JSON.stringify({ values: [[CLS_SIN_CLASIFICAR, mat, GRP_SIN_CLASIFICAR, ens, tec||'', '', '']] })
     });
   }catch(e){
     console.error('Error al sumar ensayo nuevo a TablaEnsayosFueraLEO:', e);
@@ -4203,10 +4203,10 @@ function openModalFueraLeo(){
     return selFuera.some(function(s){return s.mat===mat&&s.ens===ens;});
   }
 
-  function toggleSel(mat,ens,tec,precio){
+  function toggleSel(mat,ens,tec,precio,derivante){
     var idx=selFuera.findIndex(function(s){return s.mat===mat&&s.ens===ens;});
     if(idx>=0){selFuera.splice(idx,1);}
-    else{selFuera.push({mat:mat,ens:ens,tec:tec,precio:precio});}
+    else{selFuera.push({mat:mat,ens:ens,tec:tec,precio:precio,derivante:derivante});}
   }
 
   function footerBase(backLabel){
@@ -4281,8 +4281,9 @@ function openModalFueraLeo(){
       header='<span style="font-size:11px;color:rgba(255,255,255,.7);">'+selMat+' › </span><span style="font-size:12px;">'+selGrp+'</span>';
       list=(grpObj.ens||[]).slice().sort(function(a,b){return a.e.localeCompare(b.e,'es');}).map(function(en){
         var ya=isSel(selMat,en.e);
-        return '<div class="modal-mat-item fl-ens-item'+(ya?' modal-ya-sel':'')+'" data-ens-e="'+encodeURIComponent(en.e)+'" data-ens-t="'+encodeURIComponent(en.t)+'" data-ens-p="'+(en.p!=null?en.p:'')+'" style="padding:9px 16px;border-bottom:1px solid #f3f4f6;cursor:pointer;background:'+(ya?'#f0fdf4':'#fff')+'">'
-          +'<div style="font-size:11px;font-weight:500;color:#111827;pointer-events:none;">'+en.e+(ya?'<span class="modal-ya-badge"> ✓ seleccionado — clic para quitar</span>':'')+'</div>'
+        var nombreConDerivante=en.e+(en.d?' ('+en.d+')':'');
+        return '<div class="modal-mat-item fl-ens-item'+(ya?' modal-ya-sel':'')+'" data-ens-e="'+encodeURIComponent(en.e)+'" data-ens-t="'+encodeURIComponent(en.t)+'" data-ens-p="'+(en.p!=null?en.p:'')+'" data-ens-d="'+encodeURIComponent(en.d||'')+'" style="padding:9px 16px;border-bottom:1px solid #f3f4f6;cursor:pointer;background:'+(ya?'#f0fdf4':'#fff')+'">'
+          +'<div style="font-size:11px;font-weight:500;color:#111827;pointer-events:none;">'+nombreConDerivante+(ya?'<span class="modal-ya-badge"> ✓ seleccionado — clic para quitar</span>':'')+'</div>'
           +'<div style="font-size:10px;color:#6b7280;margin-top:1px;pointer-events:none;">'+en.t+'</div>'
           +'</div>';
       }).join('');
@@ -4340,7 +4341,7 @@ function openModalFueraLeo(){
       selFuera.forEach(function(s){
         var r=mkRow();
         r.mat1=s.mat;r.matriz=s.mat;
-        r.nombreLibre=s.ens;r.tec=s.tec;r.cant=1;
+        r.nombreLibre=s.ens+(s.derivante?' ('+s.derivante+')':'');r.tec=s.tec;r.cant=1;
         r.muestraLibre='';r.bonif=0;r.precioManual=(s.precio!=null&&!isNaN(s.precio))?s.precio:0;
         r.fueraLeo=true;r.esDeriv=false;r.eid=null;
         APP.form.rows.push(r);
@@ -4368,7 +4369,8 @@ function openModalFueraLeo(){
       var ens=decodeURIComponent(ensItem.dataset.ensE);
       var tec=decodeURIComponent(ensItem.dataset.ensT);
       var precioSel=ensItem.dataset.ensP?parseFloat(ensItem.dataset.ensP):null;
-      toggleSel(selMat,ens,tec,precioSel);
+      var derivanteSel=ensItem.dataset.ensD?decodeURIComponent(ensItem.dataset.ensD):'';
+      toggleSel(selMat,ens,tec,precioSel,derivanteSel);
       renderModal();return;
     }
 
