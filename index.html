@@ -131,6 +131,8 @@
   .pf { font-size: 11px; font-weight: 500; color: #065f46; text-align: right; padding: 5px 4px 3px; white-space: nowrap; }
   .pf.em { color: #9ca3af; font-weight: 400; }
   .delbtn { background: none; border: none; cursor: pointer; color: #9ca3af; padding: 2px 3px; font-size: 13px; display: inline-flex; align-items: center; }
+  .ro-lock { pointer-events: none !important; user-select: none; }
+  .ro-lock input, .ro-lock select, .ro-lock textarea { background: #f9fafb !important; cursor: default !important; }
   .delbtn:hover { color: #991b1b; }
   .addbtn { width: 100%; padding: 6px; border: 0.5px dashed #d1d5db; border-radius: 6px; background: none; cursor: pointer; color: #6b7280; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 5px; font-family: var(--font-sans); margin-bottom: .85rem; }
   .addbtn:hover { background: #f9fafb; }
@@ -1833,11 +1835,11 @@ function openNew(tipo){
     APP.form=newDoc(tipo);
     if(tipo==='PR'){APP.form.numero=nextPRNumero();}
   }
-  APP.editId=null;APP.view='form';
+  APP.editId=null;APP.view='form';APP.readOnly=false;
   APP.ui={showMgrElab:false,showMgrRev:false,showMgrApr:false,showLog:false,showStatic:false,showObs:false,showEntrega:true,savedFlash:false,newApv:''};
   render();
 }
-function openEdit(id){var d=APP.docs.find(function(x){return x.id===id;});if(!d)return;
+function openEdit(id,soloLectura){var d=APP.docs.find(function(x){return x.id===id;});if(!d)return;
   // Hidratar campos faltantes para compatibilidad con docs guardados anteriormente
   var doc=JSON.parse(JSON.stringify(d));
   if(!doc.rows||doc.rows.length===0)doc.rows=[];
@@ -1847,7 +1849,7 @@ function openEdit(id){var d=APP.docs.find(function(x){return x.id===id;});if(!d)
   if(!doc.version)doc.version='0';
   if(!doc.estado)doc.estado='borrador';
   if(!doc.tarifa)doc.tarifa='leo';
-  APP.form=doc;APP.editId=id;APP.view='form';APP.ui={showMgrElab:false,showMgrRev:false,showMgrApr:false,showLog:false,showStatic:false,showObs:false,showEntrega:true,savedFlash:false,newApv:''};render();}
+  APP.form=doc;APP.editId=id;APP.view='form';APP.readOnly=!!soloLectura;APP.ui={showMgrElab:false,showMgrRev:false,showMgrApr:false,showLog:false,showStatic:false,showObs:false,showEntrega:true,savedFlash:false,newApv:''};render();}
 
 let BIB_FUERA_LEO=[];
 
@@ -2362,7 +2364,7 @@ function splitA(s){if(!s||s.startsWith("Ver")||s.startsWith("Consultar"))return 
 const APP={
   view:'list',editId:null,form:null,
   docs:[],filters:{estado:'todos',tipo:'todos',q:'',sortCol:'',sortDir:'asc',vencidos:'todos',verHistoricos:false},
-  approvers:[],elaboradores:[],revisores:[],sigLog:[],
+  approvers:[],elaboradores:[],revisores:[],sigLog:[],readOnly:false,
   ui:{showMgrElab:false,showMgrRev:false,showMgrApr:false,showLog:false,showStatic:false,showObs:false,showEntrega:true,savedFlash:false,newApv:''}
 };
 
@@ -2951,6 +2953,9 @@ function initGlobalEvents(){
     // Botón editar
     var editBtn=e.target.closest('[data-docid]');
     if(editBtn){openEdit(editBtn.dataset.docid);return;}
+    // Botón ver (solo lectura)
+    var verBtn=e.target.closest('[data-verid]');
+    if(verBtn){openEdit(verBtn.dataset.verid,true);return;}
     // Botón envío al cliente
     var enviarBtn=e.target.closest('[data-enviar]');
     if(enviarBtn){abrirPopoverEnvio(enviarBtn.dataset.enviar, enviarBtn);return;}
@@ -3184,6 +3189,7 @@ function renderList(){
               <td style="font-size:11px;color:#6b7280;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${activa.elaboro||'—'}</td>
               <td><span class="est-badge ${es}" style="padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap;">${ESTADOS[es]?ESTADOS[es].l:es}</span></td>
               <td style="white-space:nowrap;">
+                ${'<button class="icon-btn" title="Ver (solo lectura)" data-verid="'+activa.id+'" style="opacity:.75;">👁</button>'}
                 ${'<button class="icon-btn" title="Editar" data-docid="'+activa.id+'">✎</button>'}
                 ${(es==='aprobado'||es==='finalizado'||es==='enviado')?'<button class="icon-btn" data-pdf="'+activa.id+'" title="Generar PDF" style="color:#42A9B8;">⬇</button>':''}
                 ${(!esRechazado&&(es==='finalizado'||es==='aprobado'))?'<button class="icon-btn" data-enviar="'+activa.id+'" title="Registrar envío al cliente" style="color:#8b5cf6;">✉</button>':''}
@@ -3213,7 +3219,7 @@ function renderList(){
                     '<td style="font-size:11px;color:#9ca3af;padding:5px 6px;"></td>'+
                     '<td style="padding:5px 6px;"><span class="est-badge '+hEs+'" style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;opacity:.7;">'+( ESTADOS[hEs]?ESTADOS[hEs].l:hEs)+'</span></td>'+
                     '<td style="white-space:nowrap;padding:5px 6px;">'+
-                      '<button class="icon-btn" title="Ver versión" data-docid="'+h.id+'" style="opacity:.7;">👁</button>'+
+                      '<button class="icon-btn" title="Ver versión (solo lectura)" data-verid="'+h.id+'" style="opacity:.7;">👁</button>'+
                       '<button class="icon-btn" data-pdf="'+h.id+'" title="Generar PDF" style="color:#42A9B8;opacity:.7;">⬇</button>'+
                     '</td>'+
                   '</tr>';
@@ -3342,30 +3348,33 @@ function renderForm(){
        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
          <button id="btn-back" class="tb-btn">← Volver</button>
          <div style="width:0.5px;height:20px;background:rgba(255,255,255,.2);"></div>
-         <button class="tipo-btn${doc.tipo==='PR'?' sel':''}" data-tipo="PR">PR</button>
-         <button class="tipo-btn${doc.tipo==='RPOC'?' sel':''}" data-tipo="RPOC">RPOC</button>
-         ${doc.tipo==='PR'?'<button data-action="solicitar-rev-adm" style="font-size:11px;padding:3px 10px;border:0.5px solid #fbbf24;border-radius:6px;background:#fffbeb;color:#92400e;cursor:pointer;font-family:var(--font-sans);white-space:nowrap;margin-left:6px;">Solicitar revisión Adm →RPOC</button>':''}
+         <button class="tipo-btn${doc.tipo==='PR'?' sel':''}" data-tipo="PR" ${APP.readOnly?'disabled':''}>PR</button>
+         <button class="tipo-btn${doc.tipo==='RPOC'?' sel':''}" data-tipo="RPOC" ${APP.readOnly?'disabled':''}>RPOC</button>
+         ${(doc.tipo==='PR'&&!APP.readOnly)?'<button data-action="solicitar-rev-adm" style="font-size:11px;padding:3px 10px;border:0.5px solid #fbbf24;border-radius:6px;background:#fffbeb;color:#92400e;cursor:pointer;font-family:var(--font-sans);white-space:nowrap;margin-left:6px;">Solicitar revisión Adm →RPOC</button>':''}
          <span style="font-size:13px;font-weight:500;color:#fff;">${tipoLabel}</span>
+         ${APP.readOnly?'<span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;background:#fef3c7;color:#92400e;border:1px solid #fbbf24;white-space:nowrap;">🔒 SOLO LECTURA</span>':''}
        </div>
        <div style="display:flex;gap:7px;align-items:center;">
-         <select onchange="APP.form.tarifa=this.value;render();saveDocRemote(APP.form).catch(function(e){console.error('Error al guardar tarifa en SharePoint:',e);alert('No se pudo guardar en SharePoint.');});" style="font-size:10px;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);cursor:pointer;border-radius:4px;padding:3px 6px;font-family:var(--font-sans);" title="Tipo de tarifa">
+         <select ${APP.readOnly?'disabled':''} onchange="APP.form.tarifa=this.value;render();saveDocRemote(APP.form).catch(function(e){console.error('Error al guardar tarifa en SharePoint:',e);alert('No se pudo guardar en SharePoint.');});" style="font-size:10px;color:#fff;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);cursor:pointer;border-radius:4px;padding:3px 6px;font-family:var(--font-sans);" title="Tipo de tarifa">
             <option value="leo" style="color:#111;background:#fff;"${(doc.tarifa||'leo')==='leo'?' selected':''}>📋 Tarifa LEO</option>
             <option value="consorcio" style="color:#111;background:#fff;"${doc.tarifa==='consorcio'?' selected':''}>🤝 Tarifa Consorcio</option>
           </select>
           ${(function(){
             var opts=doc.tipo==='RPOC'?EST_EDIT_RPOC:EST_EDIT_PR;
-            return '<select class="tb-btn" onchange="APP.form.estado=this.value;render();" data-fk="estf" style="color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.35);cursor:pointer;">'
+            return '<select class="tb-btn" '+(APP.readOnly?'disabled':'')+' onchange="APP.form.estado=this.value;render();" data-fk="estf" style="color:#fff;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.35);cursor:pointer;">'
               +opts.map(function(k){return'<option value="'+k+'" style="color:#111827;background:#fff;"'+(doc.estado===k?' selected':'')+'>'+ESTADOS[k].l+'</option>';}).join('')
               +'</select>';
           })()}
-         <button id="btn-save" class="tb-btn accent">${APP.ui.savedFlash?'✓ Guardado':'Guardar'}</button>
-         ${doc.tipo==='RPOC'&&doc.estado==='borrador'?'<button data-action="enviar-revision" class="tb-btn" style="background:rgba(251,191,36,.2);border-color:#fbbf24;color:#fff;white-space:nowrap;">Enviar a revisión ▶</button>':''}
-         ${doc.tipo==='PR'&&doc.estado==='borrador'?'<button data-action="finalizar-pr" class="tb-btn" style="background:rgba(52,211,153,.2);border-color:#34d399;color:#fff;white-space:nowrap;">Finalizar ✓</button>':''}
-         ${doc.tipo==='PR'&&doc.estado==='finalizado'?'<button data-action="volver-borrador" class="tb-btn" style="background:rgba(156,163,175,.15);border-color:rgba(156,163,175,.5);color:#fff;font-size:10px;white-space:nowrap;">Volver a borrador</button>':''}
+         ${APP.readOnly?'':'<button id="btn-save" class="tb-btn accent">'+(APP.ui.savedFlash?'✓ Guardado':'Guardar')+'</button>'}
+         ${(!APP.readOnly&&doc.tipo==='RPOC'&&doc.estado==='borrador')?'<button data-action="enviar-revision" class="tb-btn" style="background:rgba(251,191,36,.2);border-color:#fbbf24;color:#fff;white-space:nowrap;">Enviar a revisión ▶</button>':''}
+         ${(!APP.readOnly&&doc.tipo==='PR'&&doc.estado==='borrador')?'<button data-action="finalizar-pr" class="tb-btn" style="background:rgba(52,211,153,.2);border-color:#34d399;color:#fff;white-space:nowrap;">Finalizar ✓</button>':''}
+         ${(!APP.readOnly&&doc.tipo==='PR'&&doc.estado==='finalizado')?'<button data-action="volver-borrador" class="tb-btn" style="background:rgba(156,163,175,.15);border-color:rgba(156,163,175,.5);color:#fff;font-size:10px;white-space:nowrap;">Volver a borrador</button>':''}
        </div>
      </div>
    </div>
    <div class="content">
+    ${APP.readOnly?'<div style="background:#fffbeb;border:1px solid #fbbf24;color:#92400e;padding:8px 14px;border-radius:6px;font-size:12px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">🔒 <b>Modo solo lectura.</b> Este documento se está visualizando, no se pueden guardar cambios. Volvé al listado y usá el lápiz (✎) para editarlo.</div>':''}
+    <div class="${APP.readOnly?'ro-lock':''}">
     <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:.85rem;">
       <div><label>Número</label><input class="f" style="width:110px;" value="${doc.numero}" data-fk="num" data-df="numero" placeholder="—"></div>
       <div><label>Versión</label><input class="f" type="number" min="0" style="width:50px;text-align:right;" value="${doc.version}" data-fk="ver" data-df="version"></div>
@@ -3690,6 +3699,7 @@ function renderForm(){
         <button id="toggle-log" style="font-size:11px;background:none;border:none;cursor:pointer;color:#6b7280;font-family:var(--font-sans);">${APP.ui.showLog?'Ocultar registro':'Ver registro de firmas'} (${(APP.sigLog||[]).length})</button>
         ${APP.ui.showLog?`<div style="margin-top:6px;">${(APP.sigLog||[]).length?(APP.sigLog||[]).map(function(e){return`<div style="font-size:11px;color:#6b7280;padding:2px 0;">${fmtDT(e.ts)} — ${e.role}: ${e.who}</div>`;}).join(''):'<p style="font-size:11px;color:#9ca3af;margin:0;">Sin registros.</p>'}</div>`:``}
       </div>
+    </div>
     </div>
   `;
   return html;
