@@ -92,7 +92,7 @@
   .est-badge.en_revision_adm{ background: #fffbeb; color: #92400e; border: 1px solid #fbbf24; }
   .est-badge.en_revision_sgi{ background: #eff6ff; color: #1e40af; border: 1px solid #60a5fa; }
   .est-badge.vencido   { background: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
-  .icon-btn { background: none; border: none; cursor: pointer; color: #9ca3af; padding: 3px 5px; border-radius: 4px; font-size: 14px; display: inline-flex; align-items: center; }
+  .icon-btn { background: none; border: none; cursor: pointer; color: #9ca3af; padding: 3px 3px; border-radius: 4px; font-size: 13px; display: inline-flex; align-items: center; }
   .icon-btn:hover { color: #1d3557; background: #f3f4f6; }
   .icon-btn.danger:hover { color: #991b1b; }
   .est-sel-row { font-size: 11px; padding: 3px 7px; border-radius: 10px; cursor: pointer; font-family: var(--font-sans); border: 1px solid transparent; font-weight: 600; }
@@ -3133,7 +3133,7 @@ function renderList(){
       <select id="flt-v"><option value="todos">Con y sin vencer</option><option value="vencidos"${filters.vencidos==='vencidos'?' selected':''}>Solo vencidos</option><option value="vigentes"${filters.vencidos==='vigentes'?' selected':''}>Solo vigentes</option></select>
       <span class="rec-count">${filtered.length} registro${filtered.length!==1?'s':''}</span>
     </div>
-    <div style="border:0.5px solid #d1d5db;border-radius:6px;overflow:hidden;">
+    <div style="border:0.5px solid #d1d5db;border-radius:6px;overflow-x:auto;overflow-y:hidden;">
       <table class="doc-table">
         <thead><tr>
           ${(function(){
