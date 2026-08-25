@@ -4048,10 +4048,11 @@ function generarPDF(){
     +'</div>'
     +((doc.obsSeleccionadas&&doc.obsSeleccionadas.length)||doc.obsManual?'<div class="franja">OBSERVACIONES</div><div class="pie-bloque">'+(doc.obsSeleccionadas||[]).map(function(kk){var o=OBS_LISTA.find(function(x){return x.k===kk;});return o?'<p style="margin-bottom:3px;">• '+o.t+'</p>':'';}).join('')+(doc.obsManual?'<p style="margin-bottom:3px;">• '+doc.obsManual+'</p>':'')+'</div>':'')
     +(doc.diasEntrega?'<div class="franja">TIEMPO DE ENTREGA DE RESULTADOS</div><div class="pie-bloque"><p>Entrega total: <strong>'+doc.diasEntrega+'</strong> días hábiles desde la recepción de las muestras y la solicitud de ensayos con la información requerida.</p><p style="font-size:9px;color:#374151;">Tiempo de entrega estimado. Puede variar conforme a la demanda operativa al momento de la recepción.</p></div>':'')
+    +(doc.reqEspeciales?'<div class="franja">REQUERIMIENTOS ESPECIALES DEL CLIENTE</div><div class="pie-bloque"><p>'+doc.reqEspeciales+'</p></div>':'')
     +'<div class="franja">INFORMACIÓN PARA RECEPCIÓN / ENVÍO DE MUESTRAS</div>'
     +'<div class="pie-bloque"><p><strong>SOLICITUD DE ENSAYOS:</strong> Las muestras deben estar acompañadas de la solicitud de ensayo correspondiente.</p>'
     +'<p><strong>ENVÍO Y RECEPCIÓN:</strong> Las muestras deben ser enviadas o entregadas personalmente en AV Jorge Newbery 7643- S2006- Rosario, Santa Fe (BCRlabs) en el horario de 8 a 17 h.</p>'
-    +'<p>Estacionamiento gratuito de 1/2 hora de cortesía en la cochera de la Bolsa de Comercio de Rosario, Santa Fe 1447.</p>'
+
     +'<p>Servicio de envío por Correo Argentino gratuito desde cualquier punto geográfico del país.</p>'
     +'<p>La propuesta de servicio se considerará aprobada con la aceptación vía e-mail por parte del cliente.</p></div>'
     +'<div class="franja">MEDIOS DE PAGO DISPONIBLES</div>'
