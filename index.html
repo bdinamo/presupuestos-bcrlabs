@@ -2365,7 +2365,7 @@ function splitA(s){if(!s||s.startsWith("Ver")||s.startsWith("Consultar"))return 
 const APP={
   view:'list',editId:null,form:null,
   docs:[],filters:{estado:'todos',tipo:'todos',q:'',sortCol:'',sortDir:'asc',vencidos:'todos',verHistoricos:false},
-  approvers:[],elaboradores:[],revisores:[],sigLog:[],readOnly:false,
+  approvers:[],elaboradores:[],revisores:[],sigLog:[],readOnly:false,config:{TipoCambio:'1550'},
   ui:{showMgrElab:false,showMgrRev:false,showMgrApr:false,showLog:false,showStatic:false,showObs:false,showEntrega:true,savedFlash:false,newApv:''}
 };
 
@@ -2373,11 +2373,12 @@ const BASE = `/sites/${SITE_ID}/drive/items/${ITEM_ID}/workbook`;
 
 // --- Lectura inicial (reemplaza loadStorage) ---
 async function loadStorage(){
-  const [pres, resp, log, fueraLeo] = await Promise.all([
+  const [pres, resp, log, fueraLeo, config] = await Promise.all([
     graphFetch(`${BASE}/tables('TablaPresupuestos')/rows`),
     graphFetch(`${BASE}/tables('TablaResponsables')/rows`),
     graphFetch(`${BASE}/tables('TablaLogFirmas')/rows`),
-    graphFetch(`${BASE}/tables('TablaEnsayosFueraLEO')/rows`)
+    graphFetch(`${BASE}/tables('TablaEnsayosFueraLEO')/rows`),
+    graphFetch(`${BASE}/tables('TablaConfiguracion')/rows`)
   ]);
 
   APP.docs = pres.value.map(r => {
@@ -2393,6 +2394,13 @@ async function loadStorage(){
   APP.sigLog = log.value.map(r => {
     const v = r.values[0];
     return {role:v[0], name:v[1], ts:v[2], tipo:v[3], numero:v[4], version:v[5], cliente:v[6]};
+  });
+
+  // TablaConfiguracion: columnas Clave, Valor — ej. fila "TipoCambio" / "1550"
+  APP.config = {};
+  config.value.forEach(r => {
+    const v = r.values[0];
+    APP.config[v[0]] = v[1];
   });
 
   // TablaEnsayosFueraLEO: columnas Clasificacion, Matriz, Grupo, Ensayo, Tecnica, Precio, Derivante
@@ -3648,7 +3656,7 @@ function renderForm(){
       <p>BOLSA DE COMERCIO DE ROSARIO ASOCIACIÓN CIVIL &nbsp;—&nbsp; CUIT: 30-52641408-6</p>
       <p>CBU N° 4310001322100000000016</p>
       <p style="margin-top:6px;">Para aquellos clientes que NO disponen de cuenta corriente, BCRlabs emitirá el informe de ensayos cuando se encuentre abonado.</p>
-      <p>La presente propuesta deberá ser revisada si dentro de la vigencia de la misma se producen modificaciones en la variación en el Índice de Precios al Consumidor (IPC) mayor al 3% y/o variación en el tipo de cambio mayor a U$D 1 = $ 1550.</p>
+      <p>La presente propuesta deberá ser revisada si dentro de la vigencia de la misma se producen modificaciones en la variación en el Índice de Precios al Consumidor (IPC) mayor al 3% y/o variación en el tipo de cambio mayor a U$D 1 = $ ${APP.config.TipoCambio||1550}.</p>
       <p>Vencida la vigencia del presente documento BCRlabs se reserva el derecho de modificar los precios sin previo aviso.</p>
       <p>La solicitud del servicio de Código Rojo (urgencia) implicará un cargo adicional correspondiente al valor vigente del mismo, por cada muestra.</p>
       <p>Toda solicitud de ensayo vinculada a esta RPOC puede incluir ensayos del LEO, sin implicar una nueva versión, aplicando las mismas bonificaciones establecidas.</p>
@@ -4059,7 +4067,7 @@ function generarPDF(){
     +'<div class="pie-bloque"><p><strong>Transferencia bancaria</strong> | BANCO COINAG S.A. | Cuenta Corriente</p>'
     +'<p>BOLSA DE COMERCIO DE ROSARIO ASOCIACIÓN CIVIL — CUIT: 30-52641408-6 — CBU N° 4310001322100000000016</p>'
     +'<p>Para clientes sin cuenta corriente, BCRlabs emitirá el informe cuando se encuentre abonado.</p>'
-    +'<p>La propuesta deberá revisarse si el IPC varía más del 3% y/o el tipo de cambio supera USD 1 = $ 1550.</p>'
+    +'<p>La propuesta deberá revisarse si el IPC varía más del 3% y/o el tipo de cambio supera USD 1 = $ '+(APP.config.TipoCambio||1550)+'.</p>'
     +'<p>Vencida la vigencia, BCRlabs se reserva el derecho de modificar los precios sin previo aviso.</p>'
     +(doc.codigoRojo?'<p>La solicitud del servicio de Código Rojo implicará un cargo adicional por cada muestra.</p>':'')
     +'</div>'
