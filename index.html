@@ -1819,7 +1819,7 @@ function nombreArchivoDoc(doc,prefijo){
   return full.replace(/[\/\\:\*\?"<>\|]/g,'-');
 }
 const rowT=r=>{var p=0;if(r.precioManual!=null){p=r.precioManual;}else if(r.precioCongelado!=null){p=r.precioCongelado;}else{const e=getE(r.eid);if(!e&&!r.fueraLeo)return 0;var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';p=r.gm_precio!==undefined?r.gm_precio:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0);}return r.cant?p*r.cant*(1-(r.bonif||0)/100):0;};
-const GM_CODIGO_ROJO=26857;
+let GM_CODIGO_ROJO=26857;
 const docTotal=doc=>{var sub=(doc.rows||[]).reduce((s,r)=>s+rowT(r),0);return sub*(1-doc.bonifG/100)+(doc.codigoRojo?GM_CODIGO_ROJO:0);};
 const efectEst=doc=>doc.estado;
 function saveStorage(){
@@ -2402,6 +2402,7 @@ async function loadStorage(){
     const v = r.values[0];
     APP.config[v[0]] = v[1];
   });
+  if(APP.config.CodigoRojoPrecio) GM_CODIGO_ROJO = Number(APP.config.CodigoRojoPrecio) || GM_CODIGO_ROJO;
 
   // TablaEnsayosFueraLEO: columnas Clasificacion, Matriz, Grupo, Ensayo, Tecnica, Precio, Derivante
   // Se reconstruye la jerarquía cls -> mats -> m -> grps -> g -> ens -> {e,t,p,d} que espera el modal
@@ -3664,8 +3665,8 @@ function renderForm(){
 
     <div class="pie-seccion">INFORMACIÓN DE CONTACTO</div>
     <div class="pie-bloque">
-      <p><strong>SERVICIO DE ATENCIÓN AL CLIENTE</strong> &nbsp;—&nbsp; Para cotizaciones, envío de muestras y facturación: <a href="mailto:servicioalcliente@bcr.com.ar" style="color:#42A9B8;">servicioalcliente@bcr.com.ar</a> &nbsp;—&nbsp; Celular: +54 9 341 2848195</p>
-      <p><strong>PROMOCIÓN &amp; SERVICIOS</strong> &nbsp;—&nbsp; Para consultas técnicas: <a href="mailto:LaboratorioBCR@bcr.com.ar" style="color:#42A9B8;">LaboratorioBCR@bcr.com.ar</a></p>
+      <p><strong>SERVICIO DE ATENCIÓN AL CLIENTE</strong> &nbsp;—&nbsp; Para cotizaciones, envío de muestras y facturación: <a href="mailto:${APP.config.EmailAtencionCliente||'servicioalcliente@bcr.com.ar'}" style="color:#42A9B8;">${APP.config.EmailAtencionCliente||'servicioalcliente@bcr.com.ar'}</a> &nbsp;—&nbsp; Celular: ${APP.config.TelefonoAtencionCliente||'+54 9 341 2848195'}</p>
+      <p><strong>PROMOCIÓN &amp; SERVICIOS</strong> &nbsp;—&nbsp; Para consultas técnicas: <a href="mailto:${APP.config.EmailConsultasTecnicas||'LaboratorioBCR@bcr.com.ar'}" style="color:#42A9B8;">${APP.config.EmailConsultasTecnicas||'LaboratorioBCR@bcr.com.ar'}</a></p>
       <p style="margin-top:6px;font-size:10.5px;color:#6b7280;font-style:italic;">BCR informa que mantiene la confidencialidad de toda la información obtenida de la prestación de sus servicios, salvo requerimiento legal y/o solicitud por entidad competente.</p>
     </div>
 
@@ -4073,8 +4074,8 @@ function generarPDF(){
     +'</div>'
     +'<div class="franja">INFORMACIÓN DE CONTACTO</div>'
     +'<div class="pie-bloque">'
-    +'<p><strong>ATENCIÓN AL CLIENTE</strong> — servicioalcliente@bcr.com.ar — +54 9 341 2848195</p>'
-    +'<p><strong>CONSULTAS TÉCNICAS</strong> — LaboratorioBCR@bcr.com.ar</p>'
+    +'<p><strong>ATENCIÓN AL CLIENTE</strong> — '+(APP.config.EmailAtencionCliente||'servicioalcliente@bcr.com.ar')+' — '+(APP.config.TelefonoAtencionCliente||'+54 9 341 2848195')+'</p>'
+    +'<p><strong>CONSULTAS TÉCNICAS</strong> — '+(APP.config.EmailConsultasTecnicas||'LaboratorioBCR@bcr.com.ar')+'</p>'
     +'<p style="font-size:9px;color:#374151;margin-top:6px;">BCR informa que mantiene la confidencialidad de toda la información obtenida de la prestación de sus servicios, salvo requerimiento legal y/o solicitud por entidad competente.</p>'
     +'</div>'
     +'</body></html>';
