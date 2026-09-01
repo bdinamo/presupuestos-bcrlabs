@@ -1084,6 +1084,61 @@ const CATEGORIAS_SELECTOR=[
   {cat:"Suelo",mats:["Suelo"]},
   {cat:"Legumbres",mats:["Arveja", "Garbanzo", "Lenteja", "Poroto", "Poroto Mung", "Vicia", "Legumbres"]}
 ];
+// --- Definiciones base recuperadas de index31-8.html ---
+const TODAY=new Date().toISOString().slice(0,10);
+const DEFAULT_OBS="Vencida la vigencia del presente documento se reserva el derecho de modificar los precios sin previo aviso.\nToda solicitud de ensayo vinculada a esta RPOC puede incluir ensayos adicionales sin implicar una nueva versión, aplicando las mismas bonificaciones establecidas.\nLa solicitud del servicio de Código Rojo (urgencia) implicará un cargo adicional correspondiente al valor vigente del mismo, por cada muestra.";
+const ESTADOS={
+  borrador:       {l:'Borrador'},
+  finalizado:     {l:'Finalizado'},
+  en_revision_adm:{l:'En revisión Adm'},
+  en_revision_sgi:{l:'En revisión SGI'},
+  aprobado:       {l:'Aprobado'},
+  enviado:        {l:'Enviado'},
+  rechazado:      {l:'Rechazado'},
+};
+// Estados editables manualmente según tipo de doc
+const EST_EDIT_PR   =['borrador','finalizado','enviado','rechazado'];
+const EST_EDIT_RPOC =['borrador','en_revision_adm','en_revision_sgi','aprobado','enviado','rechazado'];
+const EST_EDIT=EST_EDIT_PR; // fallback
+
+let rUid=0;
+const mkRow=()=>({uid:rUid++,eid:"",aitem:"",matriz:"",mat1:"",cant:1,bonif:0,tec:""});
+
+function nextPRNumero(){
+  var hoy=new Date().toISOString().slice(0,10);
+  // El consecutivo es GLOBAL (nunca se reinicia, ni por día ni por año)
+  var max=0;
+  APP.docs.forEach(function(d){
+    if(d.tipo!=='PR'||!d.numero)return;
+    var m=d.numero.match(/^PR \\d{4}-\\d{2}-\\d{2}-(\\d+)/);
+    if(m){
+      var n=parseInt(m[1],10);
+      if(n>max)max=n;
+    }
+  });
+  var next=max+1;
+  return 'PR '+hoy+'-'+String(next).padStart(4,'0');
+}
+
+const newDoc=tipo=>({
+  id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+  tipo:tipo||'RPOC',numero:'',version:'0',fecha:TODAY,validoHasta:'',
+  cliente:'',cuit:'',contacto:'',telefono:'',email:'',
+  rows:[],bonifG:0,codigoRojo:false,diasEntrega:'',reqEspeciales:'',obs:DEFAULT_OBS,obsSeleccionadas:[],obsManual:'',elaboro:'',reviso:'',aprobo:'',tsElabora:'',tsRevisa:'',tsAproba:'',
+  elaboro:'',elaboroTs:null,reviso:'',revisoTs:null,aprobo:'',aproboTs:null,
+  estado:'borrador',tarifa:'leo',solicitarRevAdm:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()
+});
+
+const fmt=n=>Math.round(Number(n)||0).toLocaleString('es-AR');
+let CLIENTES_DB=[];
+// En esta versión los clientes se cargan desde SharePoint; se mantiene un fallback vacío
+// porque algunas búsquedas todavía consultan CUITS_EXTRA.
+const CUITS_EXTRA=[];
+const fmtC=n=>`$ ${fmt(n)}`;
+const fmtDate=d=>d?new Date(d+'T12:00').toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}):'—';
+const fmtDT=d=>{const dt=new Date(d);return dt.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+dt.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});};
+// --- Fin definiciones base recuperadas ---
+
 const getE=id=>id?EN_ALL.find(e=>e.id===Number(id)):null;
 function unitPriceNow(r,tarifa){
   if(r.precioManual!=null) return r.precioManual;
@@ -1553,7 +1608,6 @@ const RPOC_ESTADOS={
   rechazado:{l:'Rechazado',color:'#ef4444',bg:'#fef2f2'},
   enviado:{l:'Enviado',color:'#006064',bg:'#e0f7fa'},
 };
-const ESTADOS=RPOC_ESTADOS;
 function RPOC_ADMIN_LIST(){ return APP.revisores; }
 function RPOC_CALIDAD_LIST(){ return APP.approvers; }
 
