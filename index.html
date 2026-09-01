@@ -1110,7 +1110,7 @@ function nextPRNumero(){
   var max=0;
   APP.docs.forEach(function(d){
     if(d.tipo!=='PR'||!d.numero)return;
-    var m=d.numero.match(/^PR \\d{4}-\\d{2}-\\d{2}-(\\d+)/);
+    var m=d.numero.match(/^PR \d{4}-\d{2}-\d{2}-(\d+)/);
     if(m){
       var n=parseInt(m[1],10);
       if(n>max)max=n;
