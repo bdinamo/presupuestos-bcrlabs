@@ -1154,6 +1154,10 @@ function nombreArchivoDoc(doc,prefijo){
 }
 const rowT=r=>{var p=0;if(r.precioManual!=null){p=r.precioManual;}else if(r.precioCongelado!=null){p=r.precioCongelado;}else{const e=getE(r.eid);if(!e&&!r.fueraLeo)return 0;var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';p=r.gm_precio!==undefined?r.gm_precio:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0);}return r.cant?p*r.cant*(1-(r.bonif||0)/100):0;};
 let GM_CODIGO_ROJO=26857;
+let GM_PRECIO_CUALIT_BASE=224206;
+let GM_PRECIO_CUALIT_ADIC=155906;
+let GM_PRECIO_CUANTIT_BASE=337743;
+let GM_PRECIO_CUANTIT_ADIC=183256;
 const docTotal=doc=>{var sub=(doc.rows||[]).reduce((s,r)=>s+rowT(r),0);return sub*(1-doc.bonifG/100)+(doc.codigoRojo?GM_CODIGO_ROJO:0);};
 const efectEst=doc=>doc.estado;
 function saveStorage(){
@@ -1230,6 +1234,8 @@ var MODAL_TAB=null;
 var MODAL_CAT=null;
 var GM_SEL_EVENTOS=[];
 var GM_NIVEL_DET="0,1%";
+let GM_CONSTRUCCIONES=[];
+let GM_EVENTOS={};
 
 function openEnsayoModal(){MODAL_SEL=[];MODAL_MAT=null;MODAL_ENS=null;MODAL_TAB=null;MODAL_CAT=null;renderModalMatrizGrilla();}
 
@@ -1714,13 +1720,14 @@ const BASE = `/sites/${SITE_ID}/drive/items/${ITEM_ID}/workbook`;
 
 // --- Lectura inicial (reemplaza loadStorage) ---
 async function loadStorage(){
-  const [pres, resp, log, fueraLeo, config, catalogoLeo] = await Promise.all([
+  const [pres, resp, log, fueraLeo, config, catalogoLeo, eventosGm] = await Promise.all([
     graphFetch(`${BASE}/tables('TablaPresupuestos')/rows`),
     graphFetch(`${BASE}/tables('TablaResponsables')/rows`),
     graphFetch(`${BASE}/tables('TablaLogFirmas')/rows`),
     graphFetch(`${BASE}/tables('TablaEnsayosFueraLEO')/rows`),
     graphFetch(`${BASE}/tables('TablaConfiguracion')/rows`),
-    graphFetch(`${BASE}/tables('TablaCatalogoLEO')/rows`)
+    graphFetch(`${BASE}/tables('TablaCatalogoLEO')/rows`),
+    graphFetch(`${BASE}/tables('TablaEventosGM')/rows`)
   ]);
 
   // TablaCatalogoLEO: columnas ID, Nombre, Alcance, Tecnica, PrecioLeo, PrecioConsorcio, MuestraMinima, Grupo, PrecioProvisorio
@@ -1730,6 +1737,20 @@ async function loadStorage(){
     if(v[5] !== '' && v[5] != null) item.pc = Number(v[5]);
     if(v[8] === 'SI' || v[8] === true) item.precioLeoProvisorio = true;
     return item;
+  });
+
+  // TablaEventosGM: columnas Matriz, Evento — la matriz "(Construcciones y genes)" son las fijas para todas las matrices
+  GM_CONSTRUCCIONES = [];
+  GM_EVENTOS = {};
+  eventosGm.value.forEach(r => {
+    const v = r.values[0];
+    const matriz = v[0], evento = v[1];
+    if(matriz === '(Construcciones y genes)'){
+      GM_CONSTRUCCIONES.push(evento);
+    } else {
+      if(!GM_EVENTOS[matriz]) GM_EVENTOS[matriz] = [];
+      GM_EVENTOS[matriz].push(evento);
+    }
   });
 
   APP.docs = pres.value.map(r => {
@@ -3065,7 +3086,6 @@ function renderForm(){
     </div>
     </div>
   `;
-  return html;
 }
 function bindForm(){
   // Autocomplete razón social
