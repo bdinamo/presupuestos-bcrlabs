@@ -134,6 +134,8 @@
   .delbtn { background: none; border: none; cursor: pointer; color: #9ca3af; padding: 2px 3px; font-size: 13px; display: inline-flex; align-items: center; }
   .ro-lock { pointer-events: none !important; user-select: none; }
   .ro-lock input, .ro-lock select, .ro-lock textarea { background: #f9fafb !important; cursor: default !important; }
+  .ro-lock .ens-tbl-scroll { pointer-events: auto !important; }
+  .ro-lock .ens-tbl-scroll * { pointer-events: none !important; }
   .delbtn:hover { color: #991b1b; }
   .addbtn { width: 100%; padding: 6px; border: 0.5px dashed #d1d5db; border-radius: 6px; background: none; cursor: pointer; color: #6b7280; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 5px; font-family: var(--font-sans); margin-bottom: .85rem; }
   .addbtn:hover { background: #f9fafb; }
@@ -2796,7 +2798,7 @@ function renderForm(){
         <div><label>E-mail</label><input class="f" type="text" id="f-email" value="${doc.email}" data-fk="" data-df-blur="email" placeholder="ejemplo@dominio.com"></div>
       </div>
     <span class="sl">Ensayos</span>
-    <div style="border:0.5px solid #d1d5db;border-radius:8px;margin-bottom:.85rem;overflow-x:auto;overflow-y:hidden;">
+    <div class="ens-tbl-scroll" style="border:0.5px solid #d1d5db;border-radius:8px;margin-bottom:.85rem;overflow-x:auto;overflow-y:hidden;">
       <table class="ens-tbl">
         <thead><tr>
           <th style="width:18px;">#</th>
@@ -2831,7 +2833,7 @@ function renderForm(){
                 ?`<div style="font-size:11px;color:#111827;line-height:1.4;padding:3px 4px;max-width:220px;overflow-wrap:break-word;">${e.n}${row.gm_desc?`<br><span style="font-size:10.5px;color:#1d3557;font-style:italic;">${row.gm_desc}</span>`:''}</div>`
                 :(row.nombreLibre?`<div style="font-size:11px;color:#111827;padding:3px 4px;">${row.nombreLibre}</div>`:`<div style="font-size:11px;color:#9ca3af;padding:3px 4px;font-style:italic;">— usar botón Agregar —</div>`)
               }</td>
-              <td><div style="font-size:10.5px;color:#6b7280;padding:3px 4px;line-height:1.4;">${tec||'—'}</div></td>
+              <td><div style="font-size:10.5px;color:#6b7280;padding:3px 4px;line-height:1.4;max-width:150px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" title="${(tec||'').replace(/"/g,'&quot;')}">${tec||'—'}</div></td>
               <td style="text-align:center;white-space:nowrap;">${leoBadge}</td>
               <td><input type="number" min="1" data-fk="cant${row.uid}" data-rn="cant" data-ruid="${row.uid}" value="${row.cant}" style="text-align:right;width:38px;"></td>
               <td><div style="font-size:11px;padding:3px 4px;color:#6b7280;white-space:nowrap;">${muestra}</div></td>
