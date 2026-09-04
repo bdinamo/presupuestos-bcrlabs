@@ -2830,7 +2830,7 @@ function renderForm(){
               <td><span class="rn">${i+1}</span></td>
               <td><div style="font-size:11px;color:#1d3557;font-weight:500;padding:3px 4px;">${row.mat1||'—'}</div></td>
               <td>${e
-                ?`<div style="font-size:11px;color:#111827;line-height:1.4;padding:3px 4px;max-width:220px;overflow-wrap:break-word;">${e.n}${row.gm_desc?`<br><span style="font-size:10.5px;color:#1d3557;font-style:italic;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;" title="${row.gm_desc.replace(/"/g,'&quot;')}">${row.gm_desc}</span>`:''}</div>`
+                ?`<div style="font-size:11px;color:#111827;line-height:1.4;padding:3px 4px;max-width:220px;overflow-wrap:break-word;">${e.n}${row.gm_desc?`<br><span style="font-size:10.5px;color:#1d3557;font-style:italic;">${row.gm_desc}</span>`:''}</div>`
                 :(row.nombreLibre?`<div style="font-size:11px;color:#111827;padding:3px 4px;">${row.nombreLibre}</div>`:`<div style="font-size:11px;color:#9ca3af;padding:3px 4px;font-style:italic;">— usar botón Agregar —</div>`)
               }</td>
               <td><div style="font-size:10.5px;color:#6b7280;padding:3px 4px;line-height:1.4;max-width:150px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" title="${(tec||'').replace(/"/g,'&quot;')}">${tec||'—'}</div></td>
