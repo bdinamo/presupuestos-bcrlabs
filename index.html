@@ -2600,9 +2600,7 @@ function renderForm(){
             var enLeo=doc.tipo==='PR'?!row.fueraLeo:(e&&!row.fueraLeo);
             var leoBadge=enLeo
               ?'<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:#d1fae5;color:#065f46;border:1px solid #34d399;">✓ LEO</span>'
-              :(row.esDeriv
-                ?'<span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;">🔁 Derivado</span>'
-                :'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:#fee2e2;color:#991b1b;border:1px solid #f87171;white-space:nowrap;">✗ Fuera</span>');
+              :'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:#fee2e2;color:#991b1b;border:1px solid #f87171;white-space:nowrap;">✗ Fuera</span>';
             var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';var esGM=row.gm_precio!==undefined;var pUnit=row.precioCongelado!=null?row.precioCongelado:(row.precioManual!=null?row.precioManual:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0));
             return`<tr style="${row.fueraLeo?'background:#fff8f8;':''}">
               <td><span class="rn">${i+1}</span></td>
