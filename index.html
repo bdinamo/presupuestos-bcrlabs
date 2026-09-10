@@ -850,7 +850,7 @@ const CATEGORIAS_SELECTOR=[
   {cat:"Legumbres",mats:["Arveja", "Garbanzo", "Lenteja", "Poroto", "Poroto Mung", "Vicia", "Legumbres"]}
 ];
 // --- Definiciones base recuperadas de index31-8.html ---
-const TODAY=new Date().toISOString().slice(0,10);
+const TODAY=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
 const DEFAULT_OBS="Vencida la vigencia del presente documento se reserva el derecho de modificar los precios sin previo aviso.\nToda solicitud de ensayo vinculada a esta RPOC puede incluir ensayos adicionales sin implicar una nueva versión, aplicando las mismas bonificaciones establecidas.\nLa solicitud del servicio de Código Rojo (urgencia) implicará un cargo adicional correspondiente al valor vigente del mismo, por cada muestra.";
 const ESTADOS={
   borrador:       {l:'Borrador'},
@@ -1591,6 +1591,12 @@ function ensayoFueraLeoExiste(mat,ens){
       });
     });
   });
+}
+function agregarObsSubcontratado(){
+  if(!APP.form.obsSeleccionadas)APP.form.obsSeleccionadas=[];
+  if(APP.form.obsSeleccionadas.indexOf('subcontratado')===-1){
+    APP.form.obsSeleccionadas.push('subcontratado');
+  }
 }
 async function agregarEnsayoFueraLeoSiNoExiste(mat,ens,tec,derivante){
   if(!mat||!ens) return;
@@ -2460,7 +2466,7 @@ const OBS_LISTA=[
   {k:"muestras_micro",t:"Se deben enviar muestras exclusivas para los ensayos de microbiología."},
   {k:"muestras_gluten",t:"Se deben enviar muestras exclusivas para el ensayo de determinación inmunológica de gluten."},
   {k:"informe_ingles",t:"De requerir el informe en inglés, se debe aclarar en la solicitud de ensayos."},
-  {k:"subcontratado",t:"Ensayo subcontratado a laboratorio externo."},
+  {k:"subcontratado",t:"** Ensayo subcontratado a laboratorio externo."},
   {k:"ld_mlod",t:"El LD informado es el calculado en el contexto de la validación (mLOD) del método de PCR, considerando todas las etapas del proceso analítico: extracción, purificación y amplificación de ADN."},
   {k:"ultimo_dia",t:"Las muestras no podrán ingresar a BCRlabs el último día hábil de la semana."},
 ];
@@ -2603,7 +2609,7 @@ function renderForm(){
               <td><div style="font-size:11px;color:#1d3557;font-weight:500;padding:3px 4px;">${row.mat1||'—'}</div></td>
               <td>${e
                 ?`<div style="font-size:11px;color:#111827;line-height:1.4;padding:3px 4px;max-width:220px;overflow-wrap:break-word;">${e.n}${row.gm_desc?`<br><span style="font-size:10.5px;color:#1d3557;font-style:italic;">${row.gm_desc}</span>`:''}</div>`
-                :(row.nombreLibre?`<div style="font-size:11px;color:#111827;padding:3px 4px;">${row.nombreLibre}</div>`:`<div style="font-size:11px;color:#9ca3af;padding:3px 4px;font-style:italic;">— usar botón Agregar —</div>`)
+                :(row.nombreLibre?`<div style="font-size:11px;color:#111827;padding:3px 4px;">${row.nombreLibre}${row.esDeriv?' <b style="color:#92400e;">**</b>':''}</div>`:`<div style="font-size:11px;color:#9ca3af;padding:3px 4px;font-style:italic;">— usar botón Agregar —</div>`)
               }</td>
               <td><div style="font-size:10.5px;color:#6b7280;padding:3px 4px;line-height:1.4;max-width:150px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;" title="${(tec||'').replace(/"/g,'&quot;')}">${tec||'—'}</div></td>
               <td style="text-align:center;white-space:nowrap;">${leoBadge}</td>
@@ -2673,14 +2679,14 @@ function renderForm(){
               return '<tr style="background:#fff8f8;">'
                 +'<td style="padding:4px 6px;text-align:center;">'+(i+1)+'</td>'
                 +'<td style="padding:4px 6px;">'+(row.mat1||'—')+'</td>'
-                +'<td style="padding:4px 6px;">'+(row.nombreLibre||(e?e.n:'—'))+(row.gm_desc?'<br><small style="color:#1d3557;">'+row.gm_desc+'</small>':'')+'</td>'
+                +'<td style="padding:4px 6px;">'+(row.nombreLibre||(e?e.n:'—'))+(row.esDeriv?' <b style="color:#92400e;">**</b>':'')+(row.gm_desc?'<br><small style="color:#1d3557;">'+row.gm_desc+'</small>':'')+'</td>'
                 +'<td style="padding:4px 6px;"><input type="text" class="f" data-fk="tecfl'+row.uid+'" data-rn="tec" data-ruid="'+row.uid+'" value="'+(tec||'')+'" placeholder="Técnica..." style="width:100%;font-size:10px;"></td>'
                 +'<td style="padding:4px 6px;text-align:center;"><span style="font-size:10px;font-weight:600;padding:1px 6px;border-radius:8px;background:#fee2e2;color:#991b1b;border:1px solid #f87171;">✗ Fuera</span></td>'
                 +'<td style="padding:4px 6px;"><input type="number" min="1" data-fk="cant'+row.uid+'" data-rn="cant" data-ruid="'+row.uid+'" value="'+row.cant+'" style="width:38px;text-align:right;"></td>'
                 +'<td style="padding:4px 6px;"><input type="text" class="f" data-fk="muesfl'+row.uid+'" data-rn="muestraLibre" data-ruid="'+row.uid+'" value="'+(row.muestraLibre?row.muestraLibre:(muestra!=='—'?muestra:''))+'" placeholder="Muestra mín..." style="width:100%;font-size:10px;"></td>'
                 +'<td style="padding:4px 6px;"><input type="number" min="0" max="100" data-fk="bon'+row.uid+'" data-rn="bonif" data-ruid="'+row.uid+'" value="'+row.bonif+'" style="width:42px;text-align:right;"></td>'
                 +'<td style="padding:4px 6px;">'
-                  +'<input type="number" min="0" data-fk="pm'+row.uid+'" data-rn="precioManual" data-ruid="'+row.uid+'" value="'+pUnit+'" style="width:72px;text-align:right;'+(sinPrecio?'background:#fef3c7;border-color:#f59e0b;color:#92400e;font-weight:600;':'')+'">'
+                  +'<input type="text" inputmode="decimal" data-fk="pm'+row.uid+'" data-rn="precioManual" data-num="1" data-ruid="'+row.uid+'" value="'+pUnit+'" style="width:72px;text-align:right;'+(sinPrecio?'background:#fef3c7;border-color:#f59e0b;color:#92400e;font-weight:600;':'')+'">'
                   +(sinPrecio?'<div style="font-size:9px;color:#f59e0b;margin-top:1px;">⚠ Sugerido</div>':'')
                 +'</td>'
                 +'<td style="padding:4px 6px;text-align:right;font-weight:600;">'+(t>0?fmtC(t):'—')+'</td>'
@@ -2896,7 +2902,7 @@ function bindForm(){
   });
   document.querySelectorAll('[data-ra]').forEach(function(el){el.addEventListener('change',function(){var r=APP.form.rows.find(function(x){return x.uid==el.dataset.ra;});if(!r)return;r.aitem=el.value;render();});});
   document.querySelectorAll('[data-rm]').forEach(function(el){el.addEventListener('input',function(){var r=APP.form.rows.find(function(x){return x.uid==el.dataset.rm;});if(!r)return;r.matriz=el.value;});});
-  document.querySelectorAll('[data-rn]').forEach(function(el){el.addEventListener('input',function(){var r=APP.form.rows.find(function(x){return x.uid==el.dataset.ruid;});if(!r)return;r[el.dataset.rn]=el.type==='number'?Number(el.value):el.value;render();});});
+  document.querySelectorAll('[data-rn]').forEach(function(el){el.addEventListener('input',function(){var r=APP.form.rows.find(function(x){return x.uid==el.dataset.ruid;});if(!r)return;r[el.dataset.rn]=(el.type==='number'||el.dataset.num)?Number(el.value):el.value;render();});});
   document.querySelectorAll('[data-del]').forEach(function(el){el.addEventListener('click',function(){APP.form.rows=APP.form.rows.filter(function(r){return r.uid!=el.dataset.del;});render();});});
   document.getElementById('addrow')&&document.getElementById('addrow').addEventListener('click',function(){openEnsayoModal();});
   document.getElementById('toggle-pie-entrega')&&document.getElementById('toggle-pie-entrega').addEventListener('click',function(){APP.ui.showEntrega=!APP.ui.showEntrega;render();});
@@ -3125,7 +3131,7 @@ function generarPDF(){
     return '<tr>'
       +'<td style="text-align:center;">'+(i+1)+'</td>'
       +'<td>'+(r.mat1||r.matriz||'')+'</td>'
-      +'<td>'+(e?e.n:r.nombreLibre||'')+(r.gm_desc?'<br><span style="font-size:8.5px;color:#1d3557;font-style:italic;">'+r.gm_desc+'</span>':'')+'</td>'
+      +'<td>'+(e?e.n:r.nombreLibre||'')+(r.esDeriv?' <b>**</b>':'')+(r.gm_desc?'<br><span style="font-size:8.5px;color:#1d3557;font-style:italic;">'+r.gm_desc+'</span>':'')+'</td>'
       +'<td>'+(e?e.t:r.tec||'')+'</td>'
       +'<td style="text-align:center;">'+r.cant+'</td>'
       +'<td style="text-align:center;">'+(r.bonif?r.bonif+'%':'—')+'</td>'
@@ -3140,7 +3146,7 @@ function generarPDF(){
     +'<table><thead><tr><th>#</th><th>Matriz</th><th>Ensayo</th><th>Técnica</th><th>Cant.</th><th>Bonif.%</th><th>P.unit.</th><th>Muestra mín.</th><th>P.final</th></tr></thead><tbody>'
     +fueraRows.map(function(r,i){
       var p=(r.precioManual||0)*r.cant*(1-(r.bonif||0)/100);
-      return '<tr><td style="text-align:center;">'+(i+1)+'</td><td>'+r.mat1+'</td><td>'+r.nombreLibre+'</td><td>'+(r.tec||'')+'</td><td style="text-align:center;">'+r.cant+'</td><td style="text-align:center;">'+(r.bonif||0)+'%</td><td style="text-align:right;">'+fmtC(r.precioManual||0)+'</td><td>—</td><td style="text-align:right;font-weight:600;">'+fmtC(p)+'</td></tr>';
+      return '<tr><td style="text-align:center;">'+(i+1)+'</td><td>'+r.mat1+'</td><td>'+r.nombreLibre+(r.esDeriv?' <b>**</b>':'')+'</td><td>'+(r.tec||'')+'</td><td style="text-align:center;">'+r.cant+'</td><td style="text-align:center;">'+(r.bonif||0)+'%</td><td style="text-align:right;">'+fmtC(r.precioManual||0)+'</td><td>—</td><td style="text-align:right;font-weight:600;">'+fmtC(p)+'</td></tr>';
     }).join('')+'</tbody></table>':'';
 
   var html='<!DOCTYPE html><html><head><meta charset="utf-8">'
@@ -3515,14 +3521,17 @@ function openModalFueraLeo(){
 
     // Agregar todos los seleccionados (igual que mconfirm en LEO)
     if(t.closest('.fl-agregar')){
+      var hayDerivadoCat=false;
       selFuera.forEach(function(s){
         var r=mkRow();
         r.mat1=s.mat;r.matriz=s.mat;
         r.nombreLibre=s.ens;r.tec=s.tec;r.cant=1;
         r.muestraLibre='';r.bonif=0;r.precioManual=(s.precio!=null&&!isNaN(s.precio))?s.precio:0;
-        r.fueraLeo=true;r.esDeriv=false;r.eid=null;
+        r.fueraLeo=true;r.esDeriv=!!s.derivante;r.eid=null;
+        if(s.derivante)hayDerivadoCat=true;
         APP.form.rows.push(r);
       });
+      if(hayDerivadoCat)agregarObsSubcontratado();
       render();
       ov.remove();
       return;
@@ -3566,8 +3575,9 @@ function openModalFueraLeo(){
       r.mat1=mat;r.matriz=mat;
       r.nombreLibre=ensN;r.tec=tec;r.cant=cant;
       r.muestraLibre=mues;r.bonif=bon;r.precioManual=precio;
-      r.fueraLeo=true;r.esDeriv=false;r.eid=null;
+      r.fueraLeo=true;r.esDeriv=!!derivManual;r.eid=null;
       APP.form.rows.push(r);
+      if(derivManual)agregarObsSubcontratado();
       agregarEnsayoFueraLeoSiNoExiste(mat,ensN,tec,derivManual);
       render();
       ov.remove();
