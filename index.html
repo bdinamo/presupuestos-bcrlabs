@@ -829,26 +829,7 @@ const TEC_MAP={
   1013:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
   1014:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
 };
-const CATEGORIAS_SELECTOR=[
-  {cat:"Aceites",mats:["Aceite de maíz neutro blanqueado", "Aceite de maíz crudo", "Aceite de maíz refinado", "Aceite de girasol crudo", "Aceite de girasol desgomado", "Aceite de girasol neutralizado", "Aceite de girasol neutralizado blanqueado", "Aceite de girasol refinado", "Aceite de soja crudo", "Aceite de soja desgomado", "Aceite de soja neutro", "Aceite de soja super desgomado neutro seco", "Aceite de soja neutro blanqueado", "Aceite de soja refinado", "Aceite de maní", "Aceite de oliva", "Aceite de colza", "Aceite de algodón", "Aceite de cártamo", "Aceite de lino", "Aceites vegetales", "Aceite de girasol", "Aceite de maíz", "Aceite crudo", "Aceite de soja", "Aceite de canola", "Aceite crudo de canola", "Aceite crudo de colza", "Aceite de sésamo", "Aceite de jojoba", "Ácidos grasos"]},
-  {cat:"Agua",mats:["Agua", "Cerveza"]},
-  {cat:"Alimentos",mats:["Alimento animal", "Yerba mate", "Hierbas aromáticas", "Verduras", "Pool de vegetales", "Alimento", "Texturizado de lupino", "Té", "Frutos secos", "Vinagre", "Aceto", "Alcohol", "Café", "Gomas", "Premezcla", "Nucleos vitamínicos"]},
-  {cat:"Bebidas",mats:["Vino"]},
-  {cat:"Biocombustibles",mats:["FAME (Esteres Metílicos)"]},
-  {cat:"Carnes",mats:["Músculo bovino", "Tiroides bovino", "Grasa bovina", "Hígado bovino", "Orina bovino", "Riñón bovino", "Suero bovino", "G. tiroides equino", "Grasa equino", "Hígado equino", "Musculo equino", "Orina equino", "Riñón ave", "Suero equino", "G. tiroides ovino", "Grasa ovino", "Hígado ovino", "Musculo ovino", "Orina ovino", "Riñón ovino", "Suero ovino", "G. tiroides caprino", "Grasa caprino", "Hígado caprino", "Musculo caprino", "Orina caprino", "Riñón caprino", "Suero caprino", "Tiroides porcino", "Grasa porcina", "Hígado porcino", "Músculo porcino", "Orina porcino", "Suero porcino", "Riñon porcino", "Hígado aviar", "Músculo aviar", "Orina aves", "Grasa ciervos de cría", "Hígado ciervos de cría", "Músculo ciervos de cría", "Grasas animales silvestres", "Hígado animales silvestres", "Musculo animales silvestre", "Peces músculo", "Peces riñon", "Crustáceos", "Muliscos bivalvos", "Moluscos cefalópodos", "Músculo molusco bivalvos", "Hamburguesa"]},
-  {cat:"Cereales",mats:["Trigo", "Trigo pan", "Maíz", "Sorgo", "Mijo", "Moha", "Avena", "Centeno", "Alpiste", "Arroz", "Trigo fideo", "Trigo forrajero", "Maíz flint", "Sorgo colorado", "Maíz pisingallo", "Sorgo bajo tanino", "Algodón", "Sorgo colorado bajo tanino", "Sorgo blanco bajo tanino", "Cebada cervecera", "Sorgo blanco", "Cebada forrajera", "Cebada", "Arroz cáscara", "Arroz cáscara largo ancho", "Malta", "Trigo plata", "Brassica carinata", "Subproducto de cebada", "Tejido de alfalfa"]},
-  {cat:"Fertilizantes",mats:["Fertilizante sólido", "Fertilizante líquido"]},
-  {cat:"Frutas",mats:["Frutas", "Huevo", "Naranja", "Arándano", "Mandarina", "Pera", "Limón", "Uva", "Manzana", "Pomelo", "Cereza", "Ciruela", "Durazno", "Pelón", "Lima", "Ananá", "Banana", "Frutilla", "Kiwi", "Mamón", "Melón", "Piña", "Sandía"]},
-  {cat:"Harinas",mats:["Harina de trigo", "Gluten de trigo", "Harina de soja", "Harina de maíz", "Harina de sorgo", "Harina de girasol", "Harina de maní", "Harina de arroz", "Harina de colza", "Harina de mandioca", "Harina de camelina", "Harina de garbanzo", "Harina de canola", "Harina de nabo"]},
-  {cat:"Hortalizas",mats:["Hortalizas", "Papa", "Perejil", "Ajo", "Remolacha", "Coriandro", "Acelga", "Apio", "Batata", "Cebolla", "Espinaca", "Lechuga", "Palta", "Pimiento", "Rúcula", "Tomate", "Zapallo", "Zanahoria"]},
-  {cat:"Lácteos",mats:["Polvos lácteos", "Leche en polvo", "Manteca", "Queso"]},
-  {cat:"Oleaginosas",mats:["Girasol", "Soja", "Lino", "Cártamo", "Colza", "Cártamo alto linoleico", "Cártamo alto oleico", "Colza 00 o canola", "Maní", "Girasol alto oleico", "Chía", "Sésamo", "Semillas de mostaza", "Camelina", "Lecitina de soja", "Cáñamo"]},
-  {cat:"Pasturas",mats:["Trébol rojo", "Cebadilla", "Alfalfa", "Trébol blanco", "Festuca", "Rye grass", "Pasto ovillo", "Lotus", "Agropiro", "Gatton panic", "Panicum", "Poroto de chaucha", "Grama Rhodes", "Triticale", "Trébol de olor blanco", "Achicoria", "Festulolium", "Pasto llorón", "Trébol amarillo", "Trébol de cuernitos", "Tejido verde de soja", "Tejido verde de maíz", "Tejido vegetal"]},
-  {cat:"Subproductos de cereales",mats:["Almidón de trigo", "Pellets de afrechillo", "Pellets de trigo", "Expeller de trigo", "Hoja de maíz", "Salvado de trigo", "Almidón de maíz", "DDGS", "Semolín de trigo", "Afrechillo de arroz", "Afrechillo de trigo", "Subproductos de malta", "Subproductos de trigo", "Jarabe de maíz", "Semolin"]},
-  {cat:"Subproductos de oleaginosas",mats:["Pellets de soja", "Pellets de girasol", "Expeller de lino", "Pellets de maní", "Expeller de soja", "Expeller de girasol", "Pellets de lino", "Expeller de algodón", "Hoja de soja", "Lecitina", "Pellets de cártamo", "Expeller de maní", "Pellets de cáscara de soja", "Glicerina", "Pellets de cáscara", "Oleína", "Subproductos de soja", "Subproductos de colza", "Pellets de camelina", "Subproductos de maní", "Subproductos de girasol", "Tejido vegetal de maní", "Cáscara de soja", "Cáscara de girasol", "Otros productos"]},
-  {cat:"Suelo",mats:["Suelo"]},
-  {cat:"Legumbres",mats:["Arveja", "Garbanzo", "Lenteja", "Poroto", "Poroto Mung", "Vicia", "Legumbres"]}
-];
+let CATEGORIAS_SELECTOR=[];
 // --- Definiciones base recuperadas de index31-8.html ---
 const TODAY=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
 const DEFAULT_OBS="Vencida la vigencia del presente documento se reserva el derecho de modificar los precios sin previo aviso.\nToda solicitud de ensayo vinculada a esta RPOC puede incluir ensayos adicionales sin implicar una nueva versión, aplicando las mismas bonificaciones establecidas.\nLa solicitud del servicio de Código Rojo (urgencia) implicará un cargo adicional correspondiente al valor vigente del mismo, por cada muestra.";
@@ -1099,8 +1080,8 @@ var AREA_TABS=[
   {label:'Suelo',fn:function(e){return e.id>=900&&e.id<=949;}},
   {label:'Fertilizantes',fn:function(e){return e.id>=950&&e.id<=999;}},
   {label:'Gen\u00e9tica Molecular',fn:function(e){return e.id>=1000&&e.id<=1099;}},
-  {label:'Carnes',fn:function(e){return e.id>=1100&&e.id<=1199;}},
-  {label:'INTA Oliveros',fn:function(e){return e.id>=1200&&e.id<=1299;}},
+  {label:'Carnes',fn:function(e){return (e.id>=1100&&e.id<=1199)||e.id===1280;}},
+  {label:'INTA Oliveros',fn:function(e){return e.id>=1200&&e.id<=1299&&e.id!==1280;}},
   {label:'CREHA Vegetal',fn:function(e){return e.id>=1300&&e.id<=1399;}},
 ];
 
@@ -1130,8 +1111,8 @@ function renderModalEnsayo(q){
     {label:'Suelo',fn:function(e){return e.id>=900&&e.id<=949;}},
     {label:MODAL_MAT,fn:function(e){return e.id>=950&&e.id<=999;}},
     {label:'Gen\u00e9tica Molecular',fn:function(e){return e.id>=1000&&e.id<=1099;}},
-    {label:'Carnes — Bovino',fn:function(e){return e.id>=1100&&e.id<=1199;}},
-    {label:'INTA Oliveros',fn:function(e){return e.id>=1200&&e.id<=1299;}},
+    {label:'Carnes — Bovino',fn:function(e){return (e.id>=1100&&e.id<=1199)||e.id===1280;}},
+    {label:'INTA Oliveros',fn:function(e){return e.id>=1200&&e.id<=1299&&e.id!==1280;}},
     {label:'CREHA Vegetal',fn:function(e){return e.id>=1300&&e.id<=1399;}},
   ];
   var yaIds=MODAL_SEL.map(function(s){return s.eid;});
@@ -1484,7 +1465,7 @@ const BASE = `/sites/${SITE_ID}/drive/items/${ITEM_ID}/workbook`;
 
 // --- Lectura inicial (reemplaza loadStorage) ---
 async function loadStorage(){
-  const [pres, resp, log, fueraLeo, config, catalogoLeo, eventosGm, matrizEnsayos] = await Promise.all([
+  const [pres, resp, log, fueraLeo, config, catalogoLeo, eventosGm, matrizEnsayos, categoriasMatriz] = await Promise.all([
     graphFetch(`${BASE}/tables('TablaPresupuestos')/rows`),
     graphFetch(`${BASE}/tables('TablaResponsables')/rows`),
     graphFetch(`${BASE}/tables('TablaLogFirmas')/rows`),
@@ -1492,8 +1473,21 @@ async function loadStorage(){
     graphFetch(`${BASE}/tables('TablaConfiguracion')/rows`),
     graphFetch(`${BASE}/tables('TablaCatalogoLEO')/rows`),
     graphFetch(`${BASE}/tables('TablaEventosGM')/rows`),
-    graphFetch(`${BASE}/tables('TablaMatrizEnsayos')/rows`)
+    graphFetch(`${BASE}/tables('TablaMatrizEnsayos')/rows`),
+    graphFetch(`${BASE}/tables('TablaCategoriasMatriz')/rows`)
   ]);
+
+  // TablaCategoriasMatriz: columnas Categoria, Matriz — se reconstruye la lista agrupada [{cat, mats:[...]}]
+  {
+    const catMap = new Map();
+    categoriasMatriz.value.forEach(r => {
+      const v = r.values[0];
+      const cat = v[0], mat = v[1];
+      if(!catMap.has(cat)) catMap.set(cat, []);
+      catMap.get(cat).push(mat);
+    });
+    CATEGORIAS_SELECTOR = Array.from(catMap.entries()).map(([cat, mats]) => ({cat, mats}));
+  }
 
   // TablaMatrizEnsayos: columnas Matriz, EnsayoID, NombreEnsayo (referencia), GrupoEnsayo (referencia)
   MATRIZ_ENSAYOS = {};
