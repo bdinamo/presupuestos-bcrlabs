@@ -244,6 +244,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style/dist/xlsx.bundle.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -267,6 +268,12 @@ async function ensureLogin(){
   const result = await msalInstance.loginPopup({ scopes: GRAPH_SCOPES });
   msalInstance.setActiveAccount(result.account);
   return result.account;
+}
+
+function usuarioActual(){
+  const account = msalInstance.getActiveAccount() || msalInstance.getAllAccounts()[0];
+  if(!account) return '—';
+  return account.name || account.username || '—';
 }
 
 async function getGraphToken(){
@@ -892,6 +899,28 @@ function unitPriceNow(r,tarifa){
   if(!e&&!r.fueraLeo) return 0;
   return r.gm_precio!==undefined?r.gm_precio:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0);
 }
+function dedupTecnica(texto){
+  if(!texto) return texto;
+  var palabras=texto.split(/\s+/);
+  var resultado=[];
+  var vistos={};
+  var i=0;
+  while(i<palabras.length){
+    var salto=0;
+    for(var tam=8; tam>=3; tam--){
+      if(i+tam>palabras.length) continue;
+      var frase=palabras.slice(i,i+tam).join(' ').toLowerCase();
+      if(vistos[frase]){ salto=tam; break; }
+    }
+    if(salto>0){ i+=salto; continue; }
+    for(var tam2=3; tam2<=8 && i+tam2<=palabras.length; tam2++){
+      vistos[palabras.slice(i,i+tam2).join(' ').toLowerCase()]=true;
+    }
+    resultado.push(palabras[i]);
+    i++;
+  }
+  return resultado.join(' ').replace(/\s+([.,])/g,'$1');
+}
 function nombreArchivoDoc(doc,prefijo){
   var base=(doc&&doc.numero)?doc.numero:'documento';
   var cliente=(doc&&doc.cliente)?doc.cliente.trim():'';
@@ -1298,6 +1327,8 @@ function diffVersiones(vieja,nueva){
     ['telefono','Teléfono'],['email','Email'],['fecha','Fecha'],
     ['validoHasta','Válido hasta'],['tarifa','Tarifa'],['diasEntrega','Días de entrega'],
     ['bonifG','Bonificación general'],['rpocTipo','Tipo RPOC'],['codigoRojo','Código Rojo (urgencia)'],
+    ['estado','Estado'],['elaboro','Elaboró'],['reviso','Revisó'],['aprobo','Aprobó'],
+    ['reqEspeciales','Requerimientos especiales del cliente'],
   ];
   camposSimples.forEach(function(c){
     var k=c[0],label=c[1];
@@ -1760,6 +1791,8 @@ function ejecutarPDF(modo){
     var saved=APP.form; APP.form=doc; generarPDF(); APP.form=saved;
   } else if(modo === 'etiqueta'){
     generarEtiqueta(doc);
+  } else if(modo === 'excel'){
+    generarExcel(doc);
   } else {
     var saved=APP.form; APP.form=doc; generarPDF(); APP.form=saved;
     setTimeout(function(){ generarEtiqueta(doc); }, 800);
@@ -2589,7 +2622,7 @@ function renderForm(){
             ${(!doc.rows||!doc.rows.length)?'<tr><td colspan="11" style="text-align:center;color:#9ca3af;padding:20px;font-size:11px;">— Usá los botones de abajo para agregar ensayos —</td></tr>':''}
             ${(doc.rows||[]).map(function(row,i){
             var e=getE(row.eid),items=e?splitA(e.a):[],t=rowT(row);
-            var tec=row.tec||(e?e.t:'');
+            var tec=dedupTecnica(row.tec||(e?e.t:''));
             var muestra=e?resolverMuestra(e.m, row.mat1||''):'—';
             var enLeo=doc.tipo==='PR'?!row.fueraLeo:(e&&!row.fueraLeo);
             var leoBadge=enLeo
@@ -2663,7 +2696,7 @@ function renderForm(){
           <tbody>
             ${(doc.rows||[]).filter(function(r){return r.fueraLeo;}).map(function(row,i){
               var e=getE(row.eid);
-              var tec=row.tec||(e?e.t:'');
+              var tec=dedupTecnica(row.tec||(e?e.t:''));
               var t=rowT(row);
               var tarifa=(APP.form&&APP.form.tarifa)?APP.form.tarifa:'leo';var pUnit=row.precioCongelado!=null?row.precioCongelado:(row.precioManual!=null?row.precioManual:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0));
               var sinPrecio=row.precioManual==null;
@@ -2730,11 +2763,11 @@ function renderForm(){
       </div>
       <div class="tfin"><span style="font-size:14px;font-weight:500;">Total a pagar</span><span style="font-size:18px;font-weight:500;">${fmtC(tot)}</span></div><div style="font-size:10px;color:#6b7280;text-align:right;margin-top:2px;font-style:italic;">Monto final expresado en pesos argentinos</div>
     </div>
-    <div class="fsec"><span class="sl">Requerimientos especiales del cliente</span>
+    <div class="fsec"><span class="sl">Requerimientos especiales del cliente por ítem de ensayo</span>
       <textarea class="f" data-fk="req" data-df="reqEspeciales" style="resize:vertical;min-height:48px;line-height:1.5;" placeholder="Indicar requerimientos especiales...">${doc.reqEspeciales}</textarea>
     </div>
     
-    <div class="fsec"><span class="sl">Observaciones</span>
+    <div class="fsec"><span class="sl">Observaciones del cliente por ítem de ensayo</span>
       <button onclick="APP.ui.showObs=!APP.ui.showObs;render();" style="font-size:11px;color:#42A9B8;background:none;border:none;cursor:pointer;font-family:var(--font-sans);padding:2px 0;display:block;margin-bottom:4px;">${APP.ui.showObs?'▲ Cerrar lista':'▼ Elegir observaciones'}</button>
       ${APP.ui.showObs?`<div class="obs-dropdown" style="margin-bottom:8px;">
         ${OBS_LISTA.map(function(o){
@@ -2754,6 +2787,11 @@ function renderForm(){
         <textarea class="f" data-fk="obsManual" data-df="obsManual" placeholder="Escribí una observación adicional que no esté en la lista..." style="width:100%;font-size:11px;min-height:50px;resize:vertical;">${doc.obsManual||''}</textarea>
       </div>
     </div>
+
+    ${(doc.creadoPor||doc.modificadoPor)?`<div style="font-size:10px;color:#9ca3af;margin:-4px 0 10px 2px;">
+      ${doc.creadoPor?'Creado por <b style="color:#6b7280;">'+doc.creadoPor+'</b>'+(doc.creadoTs?' el '+new Date(doc.creadoTs).toLocaleString('es-AR'):''):''}
+      ${(doc.modificadoPor&&doc.modificadoPor!==doc.creadoPor)?' &nbsp;·&nbsp; Última modificación: <b style="color:#6b7280;">'+doc.modificadoPor+'</b>'+(doc.modificadoTs?' el '+new Date(doc.modificadoTs).toLocaleString('es-AR'):''):''}
+    </div>`:``}
 
     ${(doc.cambios&&doc.cambios.length)?`<div class="fsec">
       <span class="sl">Historial de cambios entre versiones (auditoría)</span>
@@ -3063,19 +3101,29 @@ async function saveDoc(){
     }
   });
   doc.updatedAt=new Date().toISOString();
+  var usuarioAhora=usuarioActual();
+  if(!doc.creadoPor){ doc.creadoPor=usuarioAhora; doc.creadoTs=new Date().toISOString(); }
+  doc.modificadoPor=usuarioAhora;
+  doc.modificadoTs=new Date().toISOString();
   if(APP.editId){
     var existing=APP.docs.find(function(d){return d.id===APP.editId;});
     var esNuevaVersion=existing&&(existing.estado==='aprobado'||existing.estado==='enviado');
-    if(esNuevaVersion){
-      // Registrar en el historial de auditoría qué cambió respecto a la versión anterior
+    // Registrar en el historial de auditoría qué cambió, en CADA guardado (no solo en saltos de versión formales)
+    if(existing){
       var detallesCambio=diffVersiones(existing,doc);
-      doc.cambios=(existing.cambios||[]).concat([{
-        ts:new Date().toLocaleString('es-AR'),
-        version:doc.version,
-        versionAnterior:existing.version,
-        autor:doc.elaboro||'—',
-        detalles:detallesCambio.length?detallesCambio:['Sin cambios detectados en los campos monitoreados.']
-      }]);
+      if(detallesCambio.length){
+        doc.cambios=(existing.cambios||[]).concat([{
+          ts:new Date().toLocaleString('es-AR'),
+          version:doc.version,
+          versionAnterior:existing.version,
+          autor:usuarioAhora,
+          detalles:detallesCambio
+        }]);
+      } else {
+        doc.cambios=existing.cambios||[];
+      }
+    }
+    if(esNuevaVersion){
       // Conservar versión vieja como histórico (al final, en gris)
       var viejoHistorico=JSON.parse(JSON.stringify(existing));
       viejoHistorico.historico=true;
@@ -3108,6 +3156,114 @@ async function saveDoc(){
 function openList(){APP.view='list';render();}
 
 
+function generarExcel(doc){
+  var rows=(doc.rows||[]).filter(function(r){return r.eid||r.nombreLibre;});
+  var sub=rows.reduce(function(s,r){return s+(r.eid?rowT(r):(r.precioManual||0)*r.cant*(1-(r.bonif||0)/100));},0);
+  var dG=sub*doc.bonifG/100;
+  var total=sub-dG+(doc.codigoRojo?GM_CODIGO_ROJO:0);
+
+  var AZUL='1D3557', TEAL='42A9B8', GRIS='F9FAFB', BLANCO='FFFFFF';
+  var estTitulo={font:{bold:true,sz:14,color:{rgb:AZUL}}};
+  var estSub={font:{bold:true,sz:9,color:{rgb:'6B7280'}}};
+  var estFranja={font:{bold:true,color:{rgb:BLANCO}},fill:{fgColor:{rgb:TEAL}}};
+  var estHeaderTabla={font:{bold:true,color:{rgb:BLANCO},sz:9},fill:{fgColor:{rgb:AZUL}},alignment:{vertical:'center',wrapText:true}};
+  var estLabel={font:{bold:true,sz:9}};
+  var estCelda={font:{sz:9},alignment:{vertical:'top',wrapText:true},border:{bottom:{style:'thin',color:{rgb:'CBD5E1'}}}};
+  var estCeldaImpar={font:{sz:9},fill:{fgColor:{rgb:GRIS}},alignment:{vertical:'top',wrapText:true},border:{bottom:{style:'thin',color:{rgb:'CBD5E1'}}}};
+  var estTotal={font:{bold:true,sz:12}};
+
+  var aoa=[];
+  var merges=[];
+  var filaActual=0;
+  function push(fila){ aoa.push(fila); filaActual++; return filaActual-1; }
+  function merge(r1,c1,r2,c2){ merges.push({s:{r:r1,c:c1},e:{r:r2,c:c2}}); }
+
+  push(['BCRlabs','','','','','','','','PRESUPUESTO']);
+  merge(filaActual-1,8,filaActual-1,8);
+  push(['','','','','','','','','REVISIÓN DE PEDIDOS, OFERTAS Y CONTRATOS']);
+  push([]);
+
+  var f=push([doc.tipo==='RPOC'?'RPOC':'PR', doc.tipo==='RPOC'?'TÉCNICO/PLAZOS':'', '', 'NÚMERO', doc.numero||'']);
+  push(['', '', '', 'VERSIÓN', 'v'+(doc.version||'0')]);
+  push([]);
+
+  f=push(['PROPUESTA DE SERVICIOS']);
+  merge(f,0,f,8);
+  push(['Cliente:', doc.cliente||'', '', '', '', 'CUIT:', doc.cuit||'']);
+  push(['Contacto:', doc.contacto||'', '', '', '', 'Teléfono:', doc.telefono||'']);
+  push(['Fecha:', doc.fecha||'', '', '', '', 'Válido hasta:', doc.validoHasta||'']);
+  push([]);
+
+  var headerRow=push(['#','Matriz','Ensayo','Técnica','Cant.','Bonif.%','P.unit.','Muestra mín.','P.final']);
+
+  rows.forEach(function(r,i){
+    var e=r.eid?getE(r.eid):null;
+    var pTotal=r.eid?rowT(r):(r.precioManual||0)*r.cant*(1-(r.bonif||0)/100);
+    var esGM=r.gm_precio!==undefined;
+    var pUnit=r.cant>0?pTotal/(r.cant*(1-(r.bonif||0)/100)):0;
+    var nombreEns=(e?e.n:r.nombreLibre||'')+(r.esDeriv?' **':'')+(r.gm_desc?' — '+r.gm_desc:'');
+    push([
+      i+1, r.mat1||r.matriz||'', nombreEns, dedupTecnica(e?e.t:r.tec||''),
+      r.cant, r.bonif?r.bonif+'%':'—', esGM?'— combo —':Number(pUnit.toFixed(2)),
+      (e&&e.m?e.m:(r.muestraLibre||'—')), Number(pTotal.toFixed(2))
+    ]);
+  });
+
+  push([]);
+  f=push(['', '', '', '', '', '', '', 'TOTAL A PAGAR', Number(total.toFixed(2))]);
+  push([]);
+
+  if(doc.diasEntrega){
+    f=push(['TIEMPO DE ENTREGA DE RESULTADOS']); merge(f,0,f,8);
+    push(['Entrega total: '+doc.diasEntrega+' días hábiles desde la recepción de las muestras y la solicitud de ensayos.']);
+    push([]);
+  }
+  if(doc.reqEspeciales){
+    f=push(['REQUERIMIENTOS ESPECIALES DEL CLIENTE POR ÍTEM DE ENSAYO']); merge(f,0,f,8);
+    push([doc.reqEspeciales]);
+    push([]);
+  }
+  if((doc.obsSeleccionadas&&doc.obsSeleccionadas.length)||doc.obsManual){
+    f=push(['OBSERVACIONES DEL CLIENTE POR ÍTEM DE ENSAYO']); merge(f,0,f,8);
+    (doc.obsSeleccionadas||[]).forEach(function(kk){
+      var o=OBS_LISTA.find(function(x){return x.k===kk;});
+      if(o)push(['• '+o.t]);
+    });
+    if(doc.obsManual)push(['• '+doc.obsManual]);
+    push([]);
+  }
+  f=push(['INFORMACIÓN DE CONTACTO']); merge(f,0,f,8);
+  push(['ATENCIÓN AL CLIENTE — '+(APP.config.EmailAtencionCliente||'servicioalcliente@bcr.com.ar')+' — '+(APP.config.TelefonoAtencionCliente||'+54 9 341 2848195')]);
+  push(['CONSULTAS TÉCNICAS — '+(APP.config.EmailConsultasTecnicas||'LaboratorioBCR@bcr.com.ar')]);
+
+  var ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!merges']=merges;
+  ws['!cols']=[{wch:4},{wch:16},{wch:32},{wch:32},{wch:7},{wch:8},{wch:10},{wch:14},{wch:12}];
+
+  // Aplicar estilos celda por celda
+  for(var R=0; R<aoa.length; R++){
+    for(var C=0; C<9; C++){
+      var addr=XLSX.utils.encode_cell({r:R,c:C});
+      if(!ws[addr]) continue;
+      if(R===0 && C===0) ws[addr].s=estTitulo;
+      else if(R===1) ws[addr].s=estSub;
+      else if(ws[addr].v==='PROPUESTA DE SERVICIOS'||ws[addr].v==='TIEMPO DE ENTREGA DE RESULTADOS'||ws[addr].v==='REQUERIMIENTOS ESPECIALES DEL CLIENTE POR ÍTEM DE ENSAYO'||ws[addr].v==='OBSERVACIONES DEL CLIENTE POR ÍTEM DE ENSAYO'||ws[addr].v==='INFORMACIÓN DE CONTACTO') ws[addr].s=estFranja;
+      else if(R===headerRow) ws[addr].s=estHeaderTabla;
+      else if(R>headerRow && R<headerRow+1+rows.length){
+        var idxFila=R-headerRow-1;
+        ws[addr].s=(idxFila%2===1)?estCeldaImpar:estCelda;
+      }
+      else if(typeof ws[addr].v==='string' && (ws[addr].v==='Cliente:'||ws[addr].v==='Contacto:'||ws[addr].v==='Fecha:'||ws[addr].v==='CUIT:'||ws[addr].v==='Teléfono:'||ws[addr].v==='Válido hasta:'||ws[addr].v==='NÚMERO'||ws[addr].v==='VERSIÓN'||ws[addr].v==='RPOC'||ws[addr].v==='PR'||ws[addr].v==='TOTAL A PAGAR')) ws[addr].s=estLabel;
+    }
+  }
+  var totalAddr=XLSX.utils.encode_cell({r:headerRow+1+rows.length+1,c:8});
+  if(ws[totalAddr]) ws[totalAddr].s=estTotal;
+
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Presupuesto');
+  XLSX.writeFile(wb, nombreArchivoDoc(doc)+'_v'+(doc.version||0)+'.xlsx');
+}
+
 function generarPDF(){
   var doc=APP.form;
   var rows=(doc.rows||[]).filter(function(r){return r.eid||r.nombreLibre;});
@@ -3124,7 +3280,7 @@ function generarPDF(){
       +'<td style="text-align:center;">'+(i+1)+'</td>'
       +'<td>'+(r.mat1||r.matriz||'')+'</td>'
       +'<td>'+(e?e.n:r.nombreLibre||'')+(r.esDeriv?' <b>**</b>':'')+(r.gm_desc?'<br><span style="font-size:8.5px;color:#1d3557;font-style:italic;">'+r.gm_desc+'</span>':'')+'</td>'
-      +'<td>'+(e?e.t:r.tec||'')+'</td>'
+      +'<td>'+dedupTecnica(e?e.t:r.tec||'')+'</td>'
       +'<td style="text-align:center;">'+r.cant+'</td>'
       +'<td style="text-align:center;">'+(r.bonif?r.bonif+'%':'—')+'</td>'
       +'<td style="text-align:right;'+(esGM?'color:#9ca3af;font-style:italic;':'')+'">'+(esGM?'— combo —':fmtC(pUnit))+'</td>'
@@ -3138,7 +3294,7 @@ function generarPDF(){
     +'<table><thead><tr><th>#</th><th>Matriz</th><th>Ensayo</th><th>Técnica</th><th>Cant.</th><th>Bonif.%</th><th>P.unit.</th><th>Muestra mín.</th><th>P.final</th></tr></thead><tbody>'
     +fueraRows.map(function(r,i){
       var p=(r.precioManual||0)*r.cant*(1-(r.bonif||0)/100);
-      return '<tr><td style="text-align:center;">'+(i+1)+'</td><td>'+r.mat1+'</td><td>'+r.nombreLibre+(r.esDeriv?' <b>**</b>':'')+'</td><td>'+(r.tec||'')+'</td><td style="text-align:center;">'+r.cant+'</td><td style="text-align:center;">'+(r.bonif||0)+'%</td><td style="text-align:right;">'+fmtC(r.precioManual||0)+'</td><td>—</td><td style="text-align:right;font-weight:600;">'+fmtC(p)+'</td></tr>';
+      return '<tr><td style="text-align:center;">'+(i+1)+'</td><td>'+r.mat1+'</td><td>'+r.nombreLibre+(r.esDeriv?' <b>**</b>':'')+'</td><td>'+dedupTecnica(r.tec||'')+'</td><td style="text-align:center;">'+r.cant+'</td><td style="text-align:center;">'+(r.bonif||0)+'%</td><td style="text-align:right;">'+fmtC(r.precioManual||0)+'</td><td>—</td><td style="text-align:right;font-weight:600;">'+fmtC(p)+'</td></tr>';
     }).join('')+'</tbody></table>':'';
 
   var html='<!DOCTYPE html><html><head><meta charset="utf-8">'
@@ -3207,9 +3363,9 @@ function generarPDF(){
     +'<div class="total-final"><span>TOTAL A PAGAR</span><span>'+fmtC(total)+'</span></div>'
     +'<div style="font-size:9px;color:#374151;margin-top:2px;">Monto final expresado en pesos argentinos</div>'
     +'</div>'
-    +((doc.obsSeleccionadas&&doc.obsSeleccionadas.length)||doc.obsManual?'<div class="franja">OBSERVACIONES</div><div class="pie-bloque">'+(doc.obsSeleccionadas||[]).map(function(kk){var o=OBS_LISTA.find(function(x){return x.k===kk;});return o?'<p style="margin-bottom:3px;">• '+o.t+'</p>':'';}).join('')+(doc.obsManual?'<p style="margin-bottom:3px;">• '+doc.obsManual+'</p>':'')+'</div>':'')
+    +((doc.obsSeleccionadas&&doc.obsSeleccionadas.length)||doc.obsManual?'<div class="franja">OBSERVACIONES DEL CLIENTE POR ÍTEM DE ENSAYO</div><div class="pie-bloque">'+(doc.obsSeleccionadas||[]).map(function(kk){var o=OBS_LISTA.find(function(x){return x.k===kk;});return o?'<p style="margin-bottom:3px;">• '+o.t+'</p>':'';}).join('')+(doc.obsManual?'<p style="margin-bottom:3px;">• '+doc.obsManual+'</p>':'')+'</div>':'')
     +(doc.diasEntrega?'<div class="franja">TIEMPO DE ENTREGA DE RESULTADOS</div><div class="pie-bloque"><p>Entrega total: <strong>'+doc.diasEntrega+'</strong> días hábiles desde la recepción de las muestras y la solicitud de ensayos con la información requerida.</p><p style="font-size:9px;color:#374151;">Tiempo de entrega estimado. Puede variar conforme a la demanda operativa al momento de la recepción.</p></div>':'')
-    +(doc.reqEspeciales?'<div class="franja">REQUERIMIENTOS ESPECIALES DEL CLIENTE</div><div class="pie-bloque"><p>'+doc.reqEspeciales+'</p></div>':'')
+    +(doc.reqEspeciales?'<div class="franja">REQUERIMIENTOS ESPECIALES DEL CLIENTE POR ÍTEM DE ENSAYO</div><div class="pie-bloque"><p>'+doc.reqEspeciales+'</p></div>':'')
     +'<div class="franja">INFORMACIÓN PARA RECEPCIÓN / ENVÍO DE MUESTRAS</div>'
     +'<div class="pie-bloque"><p><strong>SOLICITUD DE ENSAYOS:</strong> Las muestras deben estar acompañadas de la solicitud de ensayo correspondiente.</p>'
     +'<p><strong>ENVÍO Y RECEPCIÓN:</strong> Las muestras deben ser enviadas o entregadas personalmente en AV Jorge Newbery 7643- S2006- Rosario, Santa Fe (BCRlabs) en el horario de 8 a 20 h.</p>'
@@ -3961,6 +4117,7 @@ initGlobalEvents();
     <div style="display:flex;flex-direction:column;gap:7px;">
       <button onclick="ejecutarPDF('presupuesto')" style="padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;background:#fff;cursor:pointer;font-size:11px;font-family:var(--font-sans);text-align:left;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">📄</span><span><strong>Presupuesto</strong><br><span style="color:#6b7280;font-size:10px;">Documento completo</span></span></button>
       <button onclick="ejecutarPDF('etiqueta')" style="padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;background:#fff;cursor:pointer;font-size:11px;font-family:var(--font-sans);text-align:left;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">🏷</span><span><strong>Etiqueta de muestra</strong><br><span style="color:#6b7280;font-size:10px;">4 etiquetas por hoja A4</span></span></button>
+      <button onclick="ejecutarPDF('excel')" style="padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;background:#fff;cursor:pointer;font-size:11px;font-family:var(--font-sans);text-align:left;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">📊</span><span><strong>Excel</strong><br><span style="color:#6b7280;font-size:10px;">Mismo formato que el PDF</span></span></button>
       <button onclick="ejecutarPDF('ambos')" style="padding:8px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;cursor:pointer;font-size:11px;font-family:var(--font-sans);text-align:left;display:flex;align-items:center;gap:8px;"><span style="font-size:16px;">📄🏷</span><span><strong>Ambos</strong><br><span style="color:#6b7280;font-size:10px;">Presupuesto + etiqueta</span></span></button>
       <button onclick="cerrarPopoverPDF()" style="padding:6px;border:none;background:none;cursor:pointer;font-size:10px;color:#9ca3af;font-family:var(--font-sans);">Cancelar</button>
     </div>
