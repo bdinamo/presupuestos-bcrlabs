@@ -1496,7 +1496,7 @@ const BASE = `/sites/${SITE_ID}/drive/items/${ITEM_ID}/workbook`;
 
 // --- Lectura inicial (reemplaza loadStorage) ---
 async function loadStorage(){
-  const [pres, resp, log, fueraLeo, config, catalogoLeo, eventosGm, matrizEnsayos, categoriasMatriz] = await Promise.all([
+  const [pres, resp, log, fueraLeo, config, catalogoLeo, eventosGm, matrizEnsayos, categoriasMatriz, observaciones] = await Promise.all([
     graphFetch(`${BASE}/tables('TablaPresupuestos')/rows`),
     graphFetch(`${BASE}/tables('TablaResponsables')/rows`),
     graphFetch(`${BASE}/tables('TablaLogFirmas')/rows`),
@@ -1505,8 +1505,15 @@ async function loadStorage(){
     graphFetch(`${BASE}/tables('TablaCatalogoLEO')/rows`),
     graphFetch(`${BASE}/tables('TablaEventosGM')/rows`),
     graphFetch(`${BASE}/tables('TablaMatrizEnsayos')/rows`),
-    graphFetch(`${BASE}/tables('TablaCategoriasMatriz')/rows`)
+    graphFetch(`${BASE}/tables('TablaCategoriasMatriz')/rows`),
+    graphFetch(`${BASE}/tables('TablaObservaciones')/rows`)
   ]);
+
+  // TablaObservaciones: columnas Clave, Texto
+  OBS_LISTA = observaciones.value.map(r => {
+    const v = r.values[0];
+    return { k: v[0], t: v[1] };
+  });
 
   // TablaCategoriasMatriz: columnas Categoria, Matriz — se reconstruye la lista agrupada [{cat, mats:[...]}]
   {
@@ -2485,18 +2492,7 @@ function resolverMuestra(m_raw, matriz){
   return simple || m_raw;
 }
 
-const OBS_LISTA=[
-  {k:"esteres",t:"Ésteres metílicos/Cromatografía: el ensayo incluye los siguientes ácidos: Caprílico (C08:0), Cáprico (C10:0), Laúrico (C12:0), Tridecanoico (C13:0), Mirístico (C14:0), Miristoleico (C14:1), Pentadecanoico (C15:0), Pentadecenonico (C15:1), Palmítico (C16:0), Palmitoleico (C16:1), Margárico (C17:0), Margaroleico (C17:1), Esteárico (C18:0), Oleico (C18:1), Linoleico (C18:2), Linolénico (C18:3), Nonadecanoico (C19:0), Araquídico (C20:0), Gadoleico (C20:1), Eicosadienoico (C20:2), Araquidónico (C20:4), Behénico (C22:0), Erúcico (C22:1), Docosadienoico (C22:2), Lignocérico (C24:0) y Nervónico (C24:1)."},
-  {k:"adn_no_det",t:"En caso de no poder extraer ADN, el ensayo se informará \"No detectable\" al nivel de detección 0,1% con la observación \"La cantidad de ADN extraído no es suficiente para realizar el ensayo de PCR\"."},
-  {k:"menor_lc",t:"En el caso que el resultado obtenido sea menor al límite de cuantificación, el ensayo se realizará por LPE.0346 Absorción Atómica - Horno de Grafito."},
-  {k:"interferencias",t:"En el caso de interferencias provenientes de la matriz, no se informarán los resultados."},
-  {k:"muestras_micro",t:"Se deben enviar muestras exclusivas para los ensayos de microbiología."},
-  {k:"muestras_gluten",t:"Se deben enviar muestras exclusivas para el ensayo de determinación inmunológica de gluten."},
-  {k:"informe_ingles",t:"De requerir el informe en inglés, se debe aclarar en la solicitud de ensayos."},
-  {k:"subcontratado",t:"** Ensayo subcontratado a laboratorio externo."},
-  {k:"ld_mlod",t:"El LD informado es el calculado en el contexto de la validación (mLOD) del método de PCR, considerando todas las etapas del proceso analítico: extracción, purificación y amplificación de ADN."},
-  {k:"ultimo_dia",t:"Las muestras no podrán ingresar a BCRlabs el último día hábil de la semana."},
-];
+let OBS_LISTA=[];
 
 function renderForm(){
   var doc=APP.form;if(!doc)return'';
@@ -3189,8 +3185,8 @@ function generarExcel(doc){
 
   f=push(['PROPUESTA DE SERVICIOS']);
   merge(f,0,f,8);
-  push(['Cliente:', doc.cliente||'', '', '', '', 'CUIT:', doc.cuit||'']);
-  push(['Contacto:', doc.contacto||'', '', '', '', 'Teléfono:', doc.telefono||'']);
+  var filaCuit=push(['Cliente:', doc.cliente||'', '', '', '', 'CUIT:', doc.cuit||'']);
+  var filaTelefono=push(['Contacto:', doc.contacto||'', '', '', '', 'Teléfono:', doc.telefono||'']);
   push(['Fecha:', doc.fecha||'', '', '', '', 'Válido hasta:', doc.validoHasta||'']);
   push([]);
 
@@ -3258,6 +3254,20 @@ function generarExcel(doc){
   }
   var totalAddr=XLSX.utils.encode_cell({r:headerRow+1+rows.length+1,c:8});
   if(ws[totalAddr]) ws[totalAddr].s=estTotal;
+
+  // Forzar CUIT y Teléfono como texto (si no, Excel los interpreta como número
+  // y los muestra en notación científica por ser demasiado largos)
+  [[filaCuit,6],[filaTelefono,6]].forEach(function(pos){
+    var addr=XLSX.utils.encode_cell({r:pos[0],c:pos[1]});
+    if(ws[addr]){ ws[addr].t='s'; ws[addr].v=String(ws[addr].v); delete ws[addr].z; }
+  });
+
+  // Configuración de impresión: una sola hoja, ajustada al ancho, para que cualquier
+  // conversor a PDF respete el orden vertical de las secciones
+  ws['!printHeader']=null;
+  ws['!margins']={left:0.3,right:0.3,top:0.4,bottom:0.4,header:0,footer:0};
+  ws['!pageSetup']={orientation:'landscape',fitToWidth:1,fitToHeight:0,scale:100};
+  ws['!fitToPage']=true;
 
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Presupuesto');
