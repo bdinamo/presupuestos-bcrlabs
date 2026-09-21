@@ -1585,6 +1585,7 @@ async function loadStorage(){
   if(APP.config.GmPrecioCualitAdic) GM_PRECIO_CUALIT_ADIC = Number(APP.config.GmPrecioCualitAdic) || GM_PRECIO_CUALIT_ADIC;
   if(APP.config.GmPrecioCuantitBase) GM_PRECIO_CUANTIT_BASE = Number(APP.config.GmPrecioCuantitBase) || GM_PRECIO_CUANTIT_BASE;
   if(APP.config.GmPrecioCuantitAdic) GM_PRECIO_CUANTIT_ADIC = Number(APP.config.GmPrecioCuantitAdic) || GM_PRECIO_CUANTIT_ADIC;
+  document.title = 'ABM de Presupuestos — '+(APP.config.LformNombre||'LFORM.0250')+' '+(APP.config.LformVersion||'V13');
 
   // TablaEnsayosFueraLEO: columnas Clasificacion, Matriz, Grupo, Ensayo, Tecnica, Precio, Derivante
   // Se reconstruye la jerarquía cls -> mats -> m -> grps -> g -> ens -> {e,t,p,d} que espera el modal
@@ -2305,7 +2306,7 @@ function renderList(){
         <p>REVISIÓN DE PEDIDOS, OFERTAS Y CONTRATOS</p>
       </div>
       <div style="font-size:10px;color:#6b7280;text-align:right;min-width:80px;">
-        <div>LFORM.0250 V13</div>
+        <div>${APP.config.LformNombre||'LFORM.0250'} ${APP.config.LformVersion||'V13'}</div>
       </div>
     </div>
     <div class="topbar-nav">
@@ -2533,7 +2534,7 @@ function renderForm(){
          <p>REVISIÓN DE PEDIDOS, OFERTAS Y CONTRATOS</p>
        </div>
        <div style="font-size:10px;color:#6b7280;text-align:right;min-width:80px;">
-         <div>LFORM.0250 V13</div>
+         <div>${APP.config.LformNombre||'LFORM.0250'} ${APP.config.LformVersion||'V13'}</div>
        </div>
      </div>
      <div class="topbar-nav">
@@ -3157,6 +3158,7 @@ function generarExcel(doc){
   var sub=rows.reduce(function(s,r){return s+(r.eid?rowT(r):(r.precioManual||0)*r.cant*(1-(r.bonif||0)/100));},0);
   var dG=sub*doc.bonifG/100;
   var total=sub-dG+(doc.codigoRojo?GM_CODIGO_ROJO:0);
+  var fueraRows=(doc.rows||[]).filter(function(r){return r.fueraLeo;});
 
   var AZUL='1D3557', TEAL='42A9B8', GRIS='F9FAFB', BLANCO='FFFFFF';
   var estTitulo={font:{bold:true,sz:14,color:{rgb:AZUL}}};
@@ -3171,26 +3173,37 @@ function generarExcel(doc){
   var aoa=[];
   var merges=[];
   var filaActual=0;
+  var headerRows=[];       // filas de encabezado de tabla (fondo azul)
+  var dataRanges=[];       // rangos [inicio,fin) de filas de datos con cebra
+  var franjaLabels={};     // valores de celda que son título de franja (fondo teal)
+  var labelCells={};       // valores de celda que son etiqueta (negrita)
   function push(fila){ aoa.push(fila); filaActual++; return filaActual-1; }
   function merge(r1,c1,r2,c2){ merges.push({s:{r:r1,c:c1},e:{r:r2,c:c2}}); }
+  function franja(texto){ var f=push([texto]); merge(f,0,f,8); franjaLabels[texto]=true; return f; }
+  ['Cliente:','Contacto:','Fecha:','CUIT:','Teléfono:','Válido hasta:','E-mail:','NÚMERO','VERSIÓN','RPOC','PR','TOTAL A PAGAR'].forEach(function(l){labelCells[l]=true;});
 
   push(['BCRlabs','','','','','','','','PRESUPUESTO']);
   merge(filaActual-1,8,filaActual-1,8);
   push(['','','','','','','','','REVISIÓN DE PEDIDOS, OFERTAS Y CONTRATOS']);
   push([]);
 
-  var f=push([doc.tipo==='RPOC'?'RPOC':'PR', doc.tipo==='RPOC'?'TÉCNICO/PLAZOS':'', '', 'NÚMERO', doc.numero||'']);
-  push(['', '', '', 'VERSIÓN', 'v'+(doc.version||'0')]);
+  push([doc.tipo==='RPOC'?'RPOC':'PR', doc.tipo==='RPOC'?'TÉCNICO/PLAZOS':'', '', 'NÚMERO', doc.numero||'']);
+  if(doc.tipo==='RPOC'){
+    push(['RPOC', 'ADMINISTRATIVO', '', 'VERSIÓN', 'v'+(doc.version||'0')]);
+  } else {
+    push(['', '', '', 'VERSIÓN', 'v'+(doc.version||'0')]);
+  }
   push([]);
 
-  f=push(['PROPUESTA DE SERVICIOS']);
-  merge(f,0,f,8);
+  franja('PROPUESTA DE SERVICIOS');
   var filaCuit=push(['Cliente:', doc.cliente||'', '', '', '', 'CUIT:', doc.cuit||'']);
   var filaTelefono=push(['Contacto:', doc.contacto||'', '', '', '', 'Teléfono:', doc.telefono||'']);
   push(['Fecha:', doc.fecha||'', '', '', '', 'Válido hasta:', doc.validoHasta||'']);
+  if(doc.email) push(['E-mail:', doc.email]);
   push([]);
 
   var headerRow=push(['#','Matriz','Ensayo','Técnica','Cant.','Bonif.%','P.unit.','Muestra mín.','P.final']);
+  headerRows.push(headerRow);
 
   rows.forEach(function(r,i){
     var e=r.eid?getE(r.eid):null;
@@ -3204,23 +3217,37 @@ function generarExcel(doc){
       (e&&e.m?e.m:(r.muestraLibre||'—')), Number(pTotal.toFixed(2))
     ]);
   });
+  dataRanges.push([headerRow+1, headerRow+1+rows.length]);
+
+  if(fueraRows.length){
+    push([]);
+    var headerFuera=franja('ENSAYOS FUERA DE LEO');
+    // franja() usó merge de la fila; ahora agregamos el encabezado propio de esta tabla
+    headerFuera=push(['#','Matriz','Ensayo','Técnica','Cant.','Bonif.%','P.unit.','Muestra mín.','P.final']);
+    headerRows.push(headerFuera);
+    fueraRows.forEach(function(r,i){
+      var p=(r.precioManual||0)*r.cant*(1-(r.bonif||0)/100);
+      push([i+1, r.mat1||'', (r.nombreLibre||'')+(r.esDeriv?' **':''), dedupTecnica(r.tec||''), r.cant, (r.bonif||0)+'%', Number((r.precioManual||0).toFixed(2)), '—', Number(p.toFixed(2))]);
+    });
+    dataRanges.push([headerFuera+1, headerFuera+1+fueraRows.length]);
+  }
 
   push([]);
-  f=push(['', '', '', '', '', '', '', 'TOTAL A PAGAR', Number(total.toFixed(2))]);
+  var filaTotal=push(['', '', '', '', '', '', '', 'TOTAL A PAGAR', Number(total.toFixed(2))]);
   push([]);
 
   if(doc.diasEntrega){
-    f=push(['TIEMPO DE ENTREGA DE RESULTADOS']); merge(f,0,f,8);
+    franja('TIEMPO DE ENTREGA DE RESULTADOS');
     push(['Entrega total: '+doc.diasEntrega+' días hábiles desde la recepción de las muestras y la solicitud de ensayos.']);
     push([]);
   }
   if(doc.reqEspeciales){
-    f=push(['REQUERIMIENTOS ESPECIALES DEL CLIENTE POR ÍTEM DE ENSAYO']); merge(f,0,f,8);
+    franja('REQUERIMIENTOS ESPECIALES DEL CLIENTE POR ÍTEM DE ENSAYO');
     push([doc.reqEspeciales]);
     push([]);
   }
   if((doc.obsSeleccionadas&&doc.obsSeleccionadas.length)||doc.obsManual){
-    f=push(['OBSERVACIONES DEL CLIENTE POR ÍTEM DE ENSAYO']); merge(f,0,f,8);
+    franja('OBSERVACIONES DEL CLIENTE POR ÍTEM DE ENSAYO');
     (doc.obsSeleccionadas||[]).forEach(function(kk){
       var o=OBS_LISTA.find(function(x){return x.k===kk;});
       if(o)push(['• '+o.t]);
@@ -3228,7 +3255,24 @@ function generarExcel(doc){
     if(doc.obsManual)push(['• '+doc.obsManual]);
     push([]);
   }
-  f=push(['INFORMACIÓN DE CONTACTO']); merge(f,0,f,8);
+
+  franja('INFORMACIÓN PARA RECEPCIÓN / ENVÍO DE MUESTRAS');
+  push(['SOLICITUD DE ENSAYOS: Las muestras deben estar acompañadas de la solicitud de ensayo correspondiente.']);
+  push(['ENVÍO Y RECEPCIÓN: Las muestras deben ser enviadas o entregadas personalmente en AV Jorge Newbery 7643- S2006- Rosario, Santa Fe (BCRlabs) en el horario de 8 a 20 h.']);
+  push(['Servicio de envío por Correo Argentino gratuito desde cualquier punto geográfico del país.']);
+  push(['La propuesta de servicio se considerará aprobada con la aceptación vía e-mail por parte del cliente.']);
+  push([]);
+
+  franja('MEDIOS DE PAGO DISPONIBLES');
+  push(['Transferencia bancaria | BANCO COINAG S.A. | Cuenta Corriente']);
+  push(['BOLSA DE COMERCIO DE ROSARIO ASOCIACIÓN CIVIL — CUIT: 30-52641408-6 — CBU N° 4310001322100000000016']);
+  push(['Para clientes sin cuenta corriente, BCRlabs emitirá el informe cuando se encuentre abonado.']);
+  push(['La propuesta deberá revisarse si el IPC varía más del 3% y/o el tipo de cambio supera USD 1 = $ '+(APP.config.TipoCambio||1550)+'.']);
+  push(['Vencida la vigencia, BCRlabs se reserva el derecho de modificar los precios sin previo aviso.']);
+  if(doc.codigoRojo) push(['La solicitud del servicio de Código Rojo implicará un cargo adicional por cada muestra.']);
+  push([]);
+
+  franja('INFORMACIÓN DE CONTACTO');
   push(['ATENCIÓN AL CLIENTE — '+(APP.config.EmailAtencionCliente||'servicioalcliente@bcr.com.ar')+' — '+(APP.config.TelefonoAtencionCliente||'+54 9 341 2848195')]);
   push(['CONSULTAS TÉCNICAS — '+(APP.config.EmailConsultasTecnicas||'LaboratorioBCR@bcr.com.ar')]);
 
@@ -3241,18 +3285,21 @@ function generarExcel(doc){
     for(var C=0; C<9; C++){
       var addr=XLSX.utils.encode_cell({r:R,c:C});
       if(!ws[addr]) continue;
+      var esHeaderTabla=headerRows.indexOf(R)!==-1;
+      var enRangoDatos=dataRanges.some(function(rg){return R>=rg[0]&&R<rg[1];});
       if(R===0 && C===0) ws[addr].s=estTitulo;
       else if(R===1) ws[addr].s=estSub;
-      else if(ws[addr].v==='PROPUESTA DE SERVICIOS'||ws[addr].v==='TIEMPO DE ENTREGA DE RESULTADOS'||ws[addr].v==='REQUERIMIENTOS ESPECIALES DEL CLIENTE POR ÍTEM DE ENSAYO'||ws[addr].v==='OBSERVACIONES DEL CLIENTE POR ÍTEM DE ENSAYO'||ws[addr].v==='INFORMACIÓN DE CONTACTO') ws[addr].s=estFranja;
-      else if(R===headerRow) ws[addr].s=estHeaderTabla;
-      else if(R>headerRow && R<headerRow+1+rows.length){
-        var idxFila=R-headerRow-1;
+      else if(franjaLabels[ws[addr].v]) ws[addr].s=estFranja;
+      else if(esHeaderTabla) ws[addr].s=estHeaderTabla;
+      else if(enRangoDatos){
+        var rg=dataRanges.filter(function(r2){return R>=r2[0]&&R<r2[1];})[0];
+        var idxFila=R-rg[0];
         ws[addr].s=(idxFila%2===1)?estCeldaImpar:estCelda;
       }
-      else if(typeof ws[addr].v==='string' && (ws[addr].v==='Cliente:'||ws[addr].v==='Contacto:'||ws[addr].v==='Fecha:'||ws[addr].v==='CUIT:'||ws[addr].v==='Teléfono:'||ws[addr].v==='Válido hasta:'||ws[addr].v==='NÚMERO'||ws[addr].v==='VERSIÓN'||ws[addr].v==='RPOC'||ws[addr].v==='PR'||ws[addr].v==='TOTAL A PAGAR')) ws[addr].s=estLabel;
+      else if(typeof ws[addr].v==='string' && labelCells[ws[addr].v]) ws[addr].s=estLabel;
     }
   }
-  var totalAddr=XLSX.utils.encode_cell({r:headerRow+1+rows.length+1,c:8});
+  var totalAddr=XLSX.utils.encode_cell({r:filaTotal,c:8});
   if(ws[totalAddr]) ws[totalAddr].s=estTotal;
 
   // Forzar CUIT y Teléfono como texto (si no, Excel los interpreta como número
@@ -3331,7 +3378,7 @@ function generarPDF(){
     +'<div class="header">'
     +'<div><span class="logo-bcr">BCR</span><span class="logo-labs">labs</span></div>'
     +'<div class="titulo">PRESUPUESTO<br>REVISIÓN DE PEDIDOS, OFERTAS Y CONTRATOS</div>'
-    +'<div style="font-size:9px;color:#374151;">LFORM.0250 V13</div>'
+    +'<div style="font-size:9px;color:#374151;">'+(APP.config.LformNombre||'LFORM.0250')+' '+(APP.config.LformVersion||'V13')+'</div>'
     +'</div>'
     +'<div style="font-size:9px;color:#374151;text-align:right;margin-bottom:6px;">'+(doc.numero||'')+(doc.version?' v'+doc.version:'')+'</div>'
     +'<table style="margin-bottom:6px;border:1px solid #cbd5e1;width:100%;">'
@@ -3934,7 +3981,7 @@ function renderKPI(){
           <div style="font-size:13px;font-weight:700;color:#fff;">PRESUPUESTO</div>
           <div style="font-size:11px;color:rgba(255,255,255,.8);">DASHBOARD COMERCIAL</div>
         </div>
-        <div style="font-size:9px;color:rgba(255,255,255,.5);">LFORM.0250 V13</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.5);">${APP.config.LformNombre||'LFORM.0250'} ${APP.config.LformVersion||'V13'}</div>
       </div>
       <div class="tb-toolbar" style="padding:6px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
         <button onclick="APP.view='list';render();" class="tb-btn" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);">← Volver al listado</button>
