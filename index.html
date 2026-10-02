@@ -2686,6 +2686,12 @@ function renderForm(){
         </div>
       </div>
 
+      <!-- Observación interna (general, no sale en PDF/Excel) -->
+      <div style="margin-bottom:10px;">
+        <label style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:3px;">🔒 Observación interna (no sale en el PDF ni en el Excel)</label>
+        <textarea class="f" data-fk="obsIntFL" data-df="obsInternaFueraLeo" placeholder="Nota interna sobre estos ensayos fuera de LEO..." style="width:100%;font-size:11px;min-height:44px;resize:vertical;background:#fafafa;">${doc.obsInternaFueraLeo||''}</textarea>
+      </div>
+
       <!-- Tabla fuera de LEO -->
       <div style="overflow-x:auto;">
         <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px;">
