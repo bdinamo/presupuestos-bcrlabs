@@ -304,538 +304,7 @@ async function graphFetch(path, options={}){
 let EN_ALL=[];
 let MATRIZ_ENSAYOS={};
 
-const TEC_MAP={
-  1:{"tipo": "unica", "fijas": ["LPE.0333 GC-MS/MS"], "opciones": []},
-  2:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  3:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  4:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  5:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  6:{"tipo": "unica", "fijas": ["LPE.0403 LC-MS/MS"], "opciones": []},
-  7:{"tipo": "unica", "fijas": ["LPE.0318 LC-MS/MS"], "opciones": []},
-  8:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  9:{"tipo": "unica", "fijas": ["LPE.0333 GC-MS/MS"], "opciones": []},
-  10:{"tipo": "unica", "fijas": ["LPE.0354 GC-MS"], "opciones": []},
-  11:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS"]},
-  12:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS"]},
-  13:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS"]},
-  14:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS"]},
-  15:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333", "LPE.0334", "LPE.0403 LC/GC-MS/MS"]},
-  16:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333", "LPE.0334", "LPE.0403 LC/GC-MS/MS"]},
-  17:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333", "LPE.0334", "LPE.0403", "LPE.0318"]},
-  18:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333", "LPE.0334", "LPE.0403 LC/GC-MS/MS"]},
-  19:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  20:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS"]},
-  21:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333", "LPE.0403", "LPE.0318 LC/GC-MS/MS"]},
-  22:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  23:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  24:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  25:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0403 LC-MS/MS", "LPE.0318 LC-MS/MS"]},
-  100:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma I)"], "opciones": []},
-  101:{"tipo": "unica", "fijas": ["Proyecto de Reglamentación"], "opciones": []},
-  102:{"tipo": "complementaria", "fijas": ["PH: Res ex SAGyP 1075/94 (Norma XXVI)", "Resto de los ensayos: Res ex SAGyP 1075/94 (Norma III)"], "opciones": []},
-  103:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma IV)"], "opciones": []},
-  104:{"tipo": "complementaria", "fijas": ["Materias extrañas y Chamico: Res ex SAGyP 1075/94 (Norma IV)", "Acidez: Res ex SAGyP 1075/94 (Norma XXVI)", "Materia grasa (EC): Res IASCAV 159/96", "Materia grasa (RMN): ISO 10565:1998"], "opciones": []},
-  105:{"tipo": "complementaria", "fijas": ["Análisis Físico: Res SENASA 27/2013 (Norma V - Anexo A)", "CP: LPE.0402 NIR"], "opciones": []},
-  106:{"tipo": "unica", "fijas": ["Res SENASA 27/2013 (Norma V - Anexo A)"], "opciones": []},
-  107:{"tipo": "unica", "fijas": ["LPE.0402 NIR"], "opciones": []},
-  108:{"tipo": "unica", "fijas": ["Analytica EBC-Method 3.6.2-BRF Method"], "opciones": []},
-  109:{"tipo": "complementaria", "fijas": ["PH: Res ex SAGyP 1075/94 (Norma XXVI)", "Resto de los ensayos: Resolución SENASA 27/2013 (Norma V - Anexo B)"], "opciones": []},
-  110:{"tipo": "unica", "fijas": ["Res SENASA 27/2013 (Norma V - Anexo B)"], "opciones": []},
-  111:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma XXVI)"], "opciones": []},
-  112:{"tipo": "complementaria", "fijas": ["M. Extrañas: Res ex SAGyP 1075/94 (Norma VII)", "Acidez: Res ex SAGyP 1075/94 (Norma XXVI)", "Materia grasa (EC): Res IASCAV 159/96", "Materia grasa (RMN): ISO 10565:1998"], "opciones": []},
-  113:{"tipo": "complementaria", "fijas": ["M. Extrañas: Res ex SAGyP 1075/94 (Norma VII)", "Materia grasa (EC): Res IASCAV 159/96", "Materia grasa (RMN): ISO 10565:1998"], "opciones": []},
-  114:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma VIII)"], "opciones": []},
-  115:{"tipo": "complementaria", "fijas": ["M. Extrañas: Res ex SAGyP 1075/94 (Norma VIII)", "Acidez: Res ex SAGyP 1075/94 (Norma XXVI)", "Materia grasa (EC): Res IASCAV 159/96", "Materia grasa (RMN): ISO 10565:1998", "Ácido erúcico: IRAM 5651:1997", "Glucosinolatos: IRAM 14824:1995"], "opciones": []},
-  116:{"tipo": "complementaria", "fijas": ["M. Extrañas: Res ex SAGyP 1075/94 (Norma VIII)", "Acidez: Res ex SAGyP 1075/94 (Norma XXVI)", "Materia grasa (EC): Res IASCAV 159/96", "Materia grasa (RMN): ISO 10565:1998"], "opciones": []},
-  117:{"tipo": "complementaria", "fijas": ["M. Extrañas: Res ex SAGyP 1075/94 (Norma VIII)", "Materia grasa (EC): Res IASCAV 159/96", "Materia grasa (RMN): ISO 10565:1998"], "opciones": []},
-  118:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma IX)"], "opciones": []},
-  119:{"tipo": "complementaria", "fijas": ["Análisis físico: Res ex SAGyP 1075/94 (Norma IX)", "Acidez: Res ex SAGyP 1075/94 (Norma XXVI)", "Materia grasa: ISO 10565:1998"], "opciones": []},
-  120:{"tipo": "complementaria", "fijas": ["Materias extrañas: Res ex SAGyP 1075/94 (Norma IX)", "Materia grasa: ISO 10565:1998"], "opciones": []},
-  121:{"tipo": "complementaria", "fijas": ["Análisis físico: Res ex SAGyP 1075/94 (Norma IX)", "Acidez: Res ex SAGyP 1075/94 (Norma XXVI)", "Materia grasa (EC): Res IASCAV 159/96", "Materia grasa (RMN): ISO 10565:1998"], "opciones": []},
-  122:{"tipo": "complementaria", "fijas": ["Materias extrañas: Res ex SAGyP 1075/94 (Norma IX)", "Materia grasa (EC): IASCAV 159/96", "Materia grasa (RMN): ISO 10565:1998"], "opciones": []},
-  123:{"tipo": "unica", "fijas": ["Proyecto de Reglamentación"], "opciones": []},
-  124:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma XI)"], "opciones": []},
-  125:{"tipo": "complementaria", "fijas": ["Res ex SAGyP 1075/94 (Norma XI) y (Norma XXVI)", "Res IASCAV 159/96"], "opciones": []},
-  126:{"tipo": "mixta", "fijas": ["PH: Res ex SAGyP 1075/94 (Norma XII)"], "opciones": ["LPE.0406 Análisis de calidad comercial (Técnica por defecto)", "LPE.0005 basado en la Res ex SAGyP 1075/94 (Norma XII)"], "default": 0},
-  127:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma XII)"], "opciones": []},
-  128:{"tipo": "mixta", "fijas": ["PH: Res ex SAGyP 1075/94 (Norma XII)"], "opciones": ["LPE.0005 basado en la Res ex SAGyP 1075/94 (Norma XII)"], "default": 0},
-  129:{"tipo": "unica", "fijas": ["Res SAGPyA 757/97"], "opciones": []},
-  130:{"tipo": "unica", "fijas": ["Res SAGPyA 757/97"], "opciones": []},
-  131:{"tipo": "mixta", "fijas": ["PH: Res ex SAGyP 1075/94 (Norma XII)"], "opciones": ["LPE.0005 basado en la Res ex SAGyP 1075/94 (Norma XII)"], "default": 0},
-  132:{"tipo": "unica", "fijas": ["Res SAGPyA 814/00 (Norma XIII)"], "opciones": []},
-  133:{"tipo": "complementaria", "fijas": ["Res SAGPyA 814/00 (Norma XIII)", "Res IASCAV 159/96"], "opciones": []},
-  134:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma XIV)"], "opciones": []},
-  135:{"tipo": "unica", "fijas": ["LPE.0015"], "opciones": []},
-  136:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma XV)"], "opciones": []},
-  137:{"tipo": "unica", "fijas": ["Res SAGPyA 151/08 (Norma XVII)"], "opciones": []},
-  138:{"tipo": "unica", "fijas": ["Res SAGPyA 151/08 (Norma XVII)"], "opciones": []},
-  139:{"tipo": "unica", "fijas": ["Res SAGPyA 151/08 (Norma XVII)"], "opciones": []},
-  140:{"tipo": "unica", "fijas": ["LPE.0402 NIR"], "opciones": []},
-  141:{"tipo": "unica", "fijas": ["ANEC 41 - Reg. Tec. N°11/2007"], "opciones": []},
-  142:{"tipo": "unica", "fijas": ["ANEC 41 - Reg. Tec. N°11/2007"], "opciones": []},
-  143:{"tipo": "unica", "fijas": ["Método Schopper"], "opciones": []},
-  144:{"tipo": "complementaria", "fijas": ["PH: Res ex SAGyP 1075/94 (Norma XXVI)", "Resto de los ensayos: Res. 189/2025"], "opciones": []},
-  145:{"tipo": "unica", "fijas": ["Res 554/11 - SENASA"], "opciones": []},
-  146:{"tipo": "unica", "fijas": ["Res 554/11 - SENASA"], "opciones": []},
-  147:{"tipo": "unica", "fijas": ["Res SAGPyA 317/99 (Norma XIX)"], "opciones": []},
-  148:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma XXI)"], "opciones": []},
-  149:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma XXI)"], "opciones": []},
-  150:{"tipo": "mixta", "fijas": ["PH: Res SAGPyA 1262/04"], "opciones": ["LPE.0406 Análisis de calidad comercial (Técnica por defecto)", "LPE.0019 basado Res SAGPyA 1262/04"], "default": 0},
-  151:{"tipo": "mixta", "fijas": ["PH y Cont. proteico: Res SAGPyA 1262/04"], "opciones": ["LPE.0406 Análisis de calidad comercial (Técnica por defecto)", "LPE.0019 basado Res SAGPyA 1262/04"], "default": 0},
-  152:{"tipo": "unica", "fijas": ["Res SAGPyA 1262/04"], "opciones": []},
-  153:{"tipo": "unica", "fijas": ["Res SAGPyA 1262/04"], "opciones": []},
-  154:{"tipo": "unica", "fijas": ["Res SAGPyA 1262/04 (Norma XX)"], "opciones": []},
-  200:{"tipo": "unica", "fijas": ["LPE.0333 GC-MS/MS"], "opciones": []},
-  201:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  202:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  203:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  204:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  205:{"tipo": "unica", "fijas": ["LPE.0403 LC-MS/MS"], "opciones": []},
-  206:{"tipo": "unica", "fijas": ["LPE.0318 LC-MS/MS"], "opciones": []},
-  207:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  208:{"tipo": "unica", "fijas": ["LPE.0333 GC-MS/MS"], "opciones": []},
-  209:{"tipo": "unica", "fijas": ["LPE.0354 GC-MS"], "opciones": []},
-  210:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS"], "default": 0},
-  211:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS"], "default": 0},
-  212:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS"], "default": 0},
-  213:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS"], "default": 0},
-  214:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS", "LPE.0403 LC-MS/MS"], "default": 0},
-  215:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS", "LPE.0403 LC-MS/MS"], "default": 0},
-  216:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS", "LPE.0403 LC-MS/MS", "LPE.0318 LC-MS/MS"], "default": 0},
-  217:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS", "LPE.0403 LC-MS/MS"], "default": 0},
-  218:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  219:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0334 LC-MS/MS"], "default": 0},
-  220:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0333 GC-MS/MS", "LPE.0403 LC-MS/MS", "LPE.0318 LC-MS/MS"], "default": 0},
-  221:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  222:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  223:{"tipo": "unica", "fijas": ["LPE.0334 LC-MS/MS"], "opciones": []},
-  224:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0403 LC-MS/MS", "LPE.0318 LC-MS/MS"], "default": 0},
-  225:{"tipo": "unica", "fijas": ["APGC TQXS"], "opciones": []},
-  226:{"tipo": "unica", "fijas": ["APGC TQXS"], "opciones": []},
-  227:{"tipo": "unica", "fijas": ["APGC TQXS"], "opciones": []},
-  228:{"tipo": "unica", "fijas": ["LPE.0356 GC-MS/MS"], "opciones": []},
-  229:{"tipo": "unica", "fijas": ["LPE.0356 GC-MS/MS"], "opciones": []},
-  230:{"tipo": "unica", "fijas": ["LPE.0356 GC-MS/MS"], "opciones": []},
-  231:{"tipo": "unica", "fijas": ["LPE.0361 LC-MS/MS"], "opciones": []},
-  232:{"tipo": "unica", "fijas": ["LPE.0361 LC-MS/MS"], "opciones": []},
-  233:{"tipo": "unica", "fijas": ["LPE.0361 LC-MS/MS"], "opciones": []},
-  234:{"tipo": "unica", "fijas": ["LPE.0361 LC-MS/MS"], "opciones": []},
-  235:{"tipo": "unica", "fijas": ["LPE.0361 LC-MS/MS"], "opciones": []},
-  236:{"tipo": "unica", "fijas": ["LPE.0361 LC-MS/MS"], "opciones": []},
-  237:{"tipo": "unica", "fijas": ["AOAC 2012.01:2021"], "opciones": []},
-  238:{"tipo": "unica", "fijas": ["LPE.0404 basado en ISO 2164"], "opciones": []},
-  239:{"tipo": "unica", "fijas": ["LPE.0363 Método colorimétrico"], "opciones": []},
-  240:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0278 Absorción Atómica - Hidruros", "LPE.0287 Absorción Atómica - Horno de Grafito (aguas)"], "default": 0, "mat_default": {"incluye_agua": 1}},
-  241:{"tipo": "unica", "fijas": ["LPE.0277 Absorción Atómica - Horno de Grafito"], "opciones": []},
-  242:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama"], "opciones": []},
-  243:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0330 Absorción Atómica - Llama", "LPE.0346 Absorción Atómica - Horno de Grafito"], "default": 0},
-  244:{"tipo": "unica", "fijas": ["LPE.0346 Absorción Atómica - Horno de Grafito"], "opciones": []},
-  245:{"tipo": "unica", "fijas": ["LPE.0286 Electrodo Ion Selectivo"], "opciones": []},
-  246:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0330 Absorción Atómica - Llama", "LPE.0346 Absorción Atómica - Horno de Grafito"], "default": 0},
-  247:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama"], "opciones": []},
-  248:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama"], "opciones": []},
-  249:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0457 Absorción Atómica - Vapor frío (excepto aguas)", "LPE.0382 Absorción Atómica - Vapor frío"], "default": 0, "mat_default": {"incluye_agua": 1}},
-  250:{"tipo": "unica", "fijas": ["LPE.0346 Absorción Atómica - Horno de Grafito"], "opciones": []},
-  251:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0277 Absorción Atómica - Horno de Grafito", "ICP-MS bas. AOAC 2015.15"], "default": 0},
-  252:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama"], "opciones": []},
-  253:{"tipo": "unica", "fijas": ["LPE.0346 Absorción Atómica - Horno de Grafito"], "opciones": []},
-  254:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama"], "opciones": []},
-  255:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0330 Absorción Atómica - Llama", "LPE.0346 Absorción Atómica - Horno de Grafito"], "default": 0},
-  300:{"tipo": "unica", "fijas": ["APHA-AWWA-WPCF:2017"], "opciones": []},
-  301:{"tipo": "unica", "fijas": ["USDA/FSIS:2014"], "opciones": []},
-  302:{"tipo": "unica", "fijas": ["FDA-BAM Cap:10 04:2022"], "opciones": []},
-  303:{"tipo": "alternativa", "fijas": [], "opciones": ["ISO 6579-1:2017/AMD 1:2020", "FDA-BAM Cap:5 09:2023"], "default": 0},
-  304:{"tipo": "unica", "fijas": ["ISO 15213-1:2023"], "opciones": []},
-  305:{"tipo": "alternativa", "fijas": [], "opciones": ["ISO 6888-1:2021/AMD 1:2023", "FDA-BAM Cap.12"], "default": 0},
-  306:{"tipo": "alternativa", "fijas": [], "opciones": ["FDA-BAM Cap.3:2001 (excepto harina de trigo)", "ISO 4833-1:2013/AMD 2022 (norma por defecto para harina de trigo)"], "default": 0, "mat_default": {"incluye_harina_trigo": 1}},
-  307:{"tipo": "unica", "fijas": ["FDA-BAM CAP. 4-10:2020"], "opciones": []},
-  308:{"tipo": "unica", "fijas": ["APHA CAP. 9:2015"], "opciones": []},
-  309:{"tipo": "alternativa", "fijas": [], "opciones": ["FDA-BAM CAP.4-10:2020", "ISO 4831:2006", "ISO 4832:2006"], "default": 0},
-  310:{"tipo": "unica", "fijas": ["ISO 21528-2:2017"], "opciones": []},
-  311:{"tipo": "alternativa", "fijas": [], "opciones": ["ISO 7251:2005", "FDA BAM CAP.4-10:2020"], "default": 0},
-  312:{"tipo": "alternativa", "fijas": [], "opciones": ["FDA-BAM Cap.18:2001", "ISO 21527-1:2008", "ISO 21527-2:2008"], "default": 0},
-  313:{"tipo": "unica", "fijas": ["ISO 7932:2004/AMD 1:2020"], "opciones": []},
-  314:{"tipo": "unica", "fijas": ["Método ICMSF-Vol 1-Cap Enterococos"], "opciones": []},
-  315:{"tipo": "unica", "fijas": ["APHA-AWWA-WPCF:2017"], "opciones": []},
-  400:{"tipo": "unica", "fijas": ["IRAM 5512:1988**"], "opciones": []},
-  401:{"tipo": "unica", "fijas": ["ISO 660:2020"], "opciones": []},
-  402:{"tipo": "unica", "fijas": ["IRAM 15866:2018"], "opciones": []},
-  403:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma XXVI)"], "opciones": []},
-  404:{"tipo": "unica", "fijas": ["IRAM 5608:2012"], "opciones": []},
-  405:{"tipo": "unica", "fijas": ["LPE.0049 basado en IRAM 5608:2012"], "opciones": []},
-  406:{"tipo": "unica", "fijas": ["LPE.0078 Titulación ácido-base"], "opciones": []},
-  407:{"tipo": "unica", "fijas": ["IRAM 15859:2014"], "opciones": []},
-  408:{"tipo": "unica", "fijas": ["LPE.0278 Absorción Atómica - Hidruros"], "opciones": []},
-  409:{"tipo": "unica", "fijas": ["LPE.0078 Titulación ácido-base"], "opciones": []},
-  410:{"tipo": "unica", "fijas": ["LPE.0277 Absorción Atómica - Horno de Grafito"], "opciones": []},
-  411:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama** LPE.0075 Titulación complejimétrica EDTA (Aguas)"], "opciones": []},
-  412:{"tipo": "unica", "fijas": ["AACC 40-26"], "opciones": []},
-  413:{"tipo": "unica", "fijas": ["LPE.0078 Titulación ácido-base"], "opciones": []},
-  414:{"tipo": "unica", "fijas": ["LPE.0077 Método de cálculo"], "opciones": []},
-  415:{"tipo": "unica", "fijas": ["IRAM 15851:2009"], "opciones": []},
-  416:{"tipo": "unica", "fijas": ["IRAM 15851:2009"], "opciones": []},
-  417:{"tipo": "unica", "fijas": ["IRAM 5589:1967"], "opciones": []},
-  418:{"tipo": "unica", "fijas": ["Gafta 12.0 - ISO 5985:2002** ISO 5985:2002"], "opciones": []},
-  419:{"tipo": "unica", "fijas": ["Gafta 11.1 - ISO 5984:2022** ISO 5984:2022"], "opciones": []},
-  420:{"tipo": "unica", "fijas": ["Gafta 11.2 - ISO 2171:2023** ISO 2171:2023"], "opciones": []},
-  421:{"tipo": "unica", "fijas": ["IRAM 5583:1982"], "opciones": []},
-  422:{"tipo": "unica", "fijas": ["LPE.0079 Titulación argentométrica"], "opciones": []},
-  423:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama*** LPE.0346 Absorción Atómica - Horno de Grafito"], "opciones": []},
-  424:{"tipo": "unica", "fijas": ["IRAM 5503:2000"], "opciones": []},
-  425:{"tipo": "unica", "fijas": ["Ver técnicas individuales"], "opciones": []},
-  426:{"tipo": "unica", "fijas": ["LPE.0070 Método conductimétrico"], "opciones": []},
-  427:{"tipo": "unica", "fijas": ["ISO 8534:2017"], "opciones": []},
-  428:{"tipo": "unica", "fijas": ["LPE.0075 Titulación complejimétrica EDTA"], "opciones": []},
-  429:{"tipo": "unica", "fijas": ["Observación visual"], "opciones": []},
-  430:{"tipo": "unica", "fijas": ["IRAM 5504:2014"], "opciones": []},
-  431:{"tipo": "unica", "fijas": ["IRAM 5575:2007"], "opciones": []},
-  432:{"tipo": "unica", "fijas": ["Energía metabolizable (PROMEFA - Guía de Procedimiento) Fibra detergente ácido (ISO 13906:2008) Fibra detergente neutro (ISO 16472:2006) Lignina detergente ácido (ISO 13906:2008) Humedad calculada a partir de la Materia seca (LPE.0206) Materia seca (PROMEFA - Guía de Procedimiento)"], "opciones": []},
-  433:{"tipo": "unica", "fijas": ["LPE.0346 Absorción Atómica - Horno de Grafito"], "opciones": []},
-  434:{"tipo": "unica", "fijas": ["IRAM 5651:1997**"], "opciones": []},
-  435:{"tipo": "unica", "fijas": ["ISO 12966-4:2015"], "opciones": []},
-  436:{"tipo": "unica", "fijas": ["IRAM 5651:1997 IRAM 5575:2007"], "opciones": []},
-  437:{"tipo": "unica", "fijas": ["Fibertec**"], "opciones": []},
-  438:{"tipo": "unica", "fijas": ["Gafta 9.0 - ISO 6865:2000** ISO 6865:2000"], "opciones": []},
-  439:{"tipo": "unica", "fijas": ["Gafta 9.0 - ISO 6865:2000 ISO 6865:2000"], "opciones": []},
-  440:{"tipo": "unica", "fijas": ["ISO 13906:2008"], "opciones": []},
-  441:{"tipo": "unica", "fijas": ["ISO 16472:2006"], "opciones": []},
-  442:{"tipo": "unica", "fijas": ["LPE.0286 Electrodo Ion Selectivo"], "opciones": []},
-  443:{"tipo": "unica", "fijas": ["IRAM 5597-2:1989"], "opciones": []},
-  444:{"tipo": "unica", "fijas": ["AOAC 965.17:2005"], "opciones": []},
-  445:{"tipo": "unica", "fijas": ["IRAM 14824:1995"], "opciones": []},
-  446:{"tipo": "unica", "fijas": ["LPE.0045 basado en IRAM 14824:1995"], "opciones": []},
-  447:{"tipo": "unica", "fijas": ["Res. N°554/11 SENASA"], "opciones": []},
-  448:{"tipo": "unica", "fijas": ["AOCS Ce 1h-05:2017"], "opciones": []},
-  449:{"tipo": "unica", "fijas": ["AOCS Ce 1h-05:2017"], "opciones": []},
-  450:{"tipo": "unica", "fijas": ["ISO 9832:2002"], "opciones": []},
-  451:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama*** LPE.0346 Absorción Atómica - Horno de Grafito"], "opciones": []},
-  452:{"tipo": "unica", "fijas": ["LPE.0402 NIR**"], "opciones": []},
-  453:{"tipo": "unica", "fijas": ["IRAM 15850-1:2009 (Trigo y Sorgo) IRAM 15850-2:2000 (Maíz) Res ex SAGyP 1075/94 (Norma XXVI) (Soja) ISO 712:2009 (Cebada cervecera y Cebada forrajera)"], "opciones": []},
-  454:{"tipo": "unica", "fijas": ["IRAM 15850-2:2000**"], "opciones": []},
-  455:{"tipo": "unica", "fijas": ["IRAM 15850-1:2009**"], "opciones": []},
-  456:{"tipo": "unica", "fijas": ["Res ex SAGyP 1075/94 (Norma XXVI)**"], "opciones": []},
-  457:{"tipo": "unica", "fijas": ["Res SAGPyA 317/99**"], "opciones": []},
-  458:{"tipo": "unica", "fijas": ["LPE.0150"], "opciones": []},
-  459:{"tipo": "unica", "fijas": ["LPE.0150**"], "opciones": []},
-  460:{"tipo": "unica", "fijas": ["Gafta 2.1 - ISO 6496:1999"], "opciones": []},
-  461:{"tipo": "unica", "fijas": ["ISO 665:2020"], "opciones": []},
-  462:{"tipo": "unica", "fijas": ["Gafta 2.3 - ISO 712:2009 ISO 712:2009"], "opciones": []},
-  463:{"tipo": "unica", "fijas": ["ISO 771:2021 Gafta 2.6 - ISO 771:2021"], "opciones": []},
-  464:{"tipo": "unica", "fijas": ["Gafta 2.4 - ISO 6540:2021 ISO 6540:2021"], "opciones": []},
-  465:{"tipo": "unica", "fijas": ["Gafta 2.5 - ISO 24557:2009** ISO 24557:2009"], "opciones": []},
-  466:{"tipo": "unica", "fijas": ["ANEC 41 - Reg. Tec. N°11/2007"], "opciones": []},
-  467:{"tipo": "unica", "fijas": ["Res IASCAV 159/96 Res SAGPyA 317/99 LPE.0096 Método Butt"], "opciones": []},
-  468:{"tipo": "unica", "fijas": ["Res IASCAV 159/96 Res SAGPyA 317/99"], "opciones": []},
-  469:{"tipo": "unica", "fijas": ["ISO 663:2017"], "opciones": []},
-  470:{"tipo": "unica", "fijas": ["ISO 660:2020"], "opciones": []},
-  471:{"tipo": "unica", "fijas": ["IRAM 5575:2007"], "opciones": []},
-  472:{"tipo": "unica", "fijas": ["IRAM 5551:2015** ISO 3960:2017"], "opciones": []},
-  473:{"tipo": "unica", "fijas": ["IRAM 5505:2005** ISO 6320:2017"], "opciones": []},
-  474:{"tipo": "unica", "fijas": ["IRAM 5516:2018**"], "opciones": []},
-  475:{"tipo": "unica", "fijas": ["ISO 3657:2023"], "opciones": []},
-  476:{"tipo": "unica", "fijas": ["IRAM 5575:2007"], "opciones": []},
-  477:{"tipo": "unica", "fijas": ["IRAM 5599-1:2013"], "opciones": []},
-  478:{"tipo": "unica", "fijas": ["ISO 13906:2008"], "opciones": []},
-  479:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama LPE.0075 Titulación complejimétrica EDTA (Aguas)"], "opciones": []},
-  480:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama"], "opciones": []},
-  481:{"tipo": "unica", "fijas": ["ISO 6883:2017"], "opciones": []},
-  482:{"tipo": "unica", "fijas": ["ISO 10565:1998"], "opciones": []},
-  483:{"tipo": "unica", "fijas": ["Res IASCAV 159/96**"], "opciones": []},
-  484:{"tipo": "unica", "fijas": ["LPE.0096 - Soxhlet**"], "opciones": []},
-  485:{"tipo": "unica", "fijas": ["Res SAGPyA 317/99**"], "opciones": []},
-  486:{"tipo": "unica", "fijas": ["Gafta 3.2 - ISO 6492:1999"], "opciones": []},
-  487:{"tipo": "unica", "fijas": ["ISO 659:2009 Gafta 3.2 - ISO 6492:1999"], "opciones": []},
-  488:{"tipo": "unica", "fijas": ["ISO 734:2023 Gafta 3.3 - ISO 734:2023"], "opciones": []},
-  489:{"tipo": "unica", "fijas": ["ISO 11085:2015 Gafta 3.1 - ISO 11085:2015"], "opciones": []},
-  490:{"tipo": "unica", "fijas": ["IRAM 5517:1988** ISO 3596:2000"], "opciones": []},
-  491:{"tipo": "unica", "fijas": ["PROMEFA - Guía de Procedimiento"], "opciones": []},
-  492:{"tipo": "unica", "fijas": ["LPE.0457 Bas AOAC 2015:01* (excepto aguas) LPE.0382 Absorción Atómica - Vapor frío"], "opciones": []},
-  493:{"tipo": "unica", "fijas": ["LPE.0346 Absorción Atómica - Horno de Grafito"], "opciones": []},
-  494:{"tipo": "unica", "fijas": ["LPE.0306 Método colorimétrico"], "opciones": []},
-  495:{"tipo": "unica", "fijas": ["LPE.0293 Método colorimétrico"], "opciones": []},
-  496:{"tipo": "unica", "fijas": ["IRAM 5510:2005** ISO 662:2016"], "opciones": []},
-  497:{"tipo": "unica", "fijas": ["LPE.0063 Método potenciométrico"], "opciones": []},
-  498:{"tipo": "unica", "fijas": ["IRAM 5670:2013**"], "opciones": []},
-  499:{"tipo": "unica", "fijas": ["AOCS Cc13k-13:2017"], "opciones": []},
-  500:{"tipo": "unica", "fijas": ["LPE.0277 Absorción Atómica - Horno de Grafito* ICP-MS bas. AOAC 2015.15"], "opciones": []},
-  501:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama"], "opciones": []},
-  502:{"tipo": "unica", "fijas": ["LPE.410 Método de cálculo ISO 10565:1998 AOAC 2001.11:2005"], "opciones": []},
-  503:{"tipo": "unica", "fijas": ["LPE.410 Método de cálculo Res IASCAV 159/96 AOAC 2001.11:2005"], "opciones": []},
-  504:{"tipo": "unica", "fijas": ["AOAC 2001.11:2005"], "opciones": []},
-  505:{"tipo": "unica", "fijas": ["AOAC 2001.11:2005**"], "opciones": []},
-  506:{"tipo": "unica", "fijas": ["LPE.0054 basado en AOAC 2001.11:2005"], "opciones": []},
-  507:{"tipo": "unica", "fijas": ["Gafta 4.2 - ISO 20483:2013 ISO 20483:2013"], "opciones": []},
-  508:{"tipo": "unica", "fijas": ["Gafta 4.1 - ISO 5983-2:2009 ISO 5983-2:2009"], "opciones": []},
-  509:{"tipo": "unica", "fijas": ["IRAM 5614:2015** ISO 14244:2014"], "opciones": []},
-  510:{"tipo": "unica", "fijas": ["ISO 15267:1998"], "opciones": []},
-  511:{"tipo": "unica", "fijas": ["LPE.0077 Método de cálculo"], "opciones": []},
-  512:{"tipo": "unica", "fijas": ["IRAM 5592:2007"], "opciones": []},
-  513:{"tipo": "unica", "fijas": ["IRAM 5521:2000**"], "opciones": []},
-  514:{"tipo": "unica", "fijas": ["ISO 15301:2001/Cor 1:2007"], "opciones": []},
-  515:{"tipo": "unica", "fijas": ["LPE.0346 Absorción Atómica - Horno de Grafito"], "opciones": []},
-  516:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama"], "opciones": []},
-  517:{"tipo": "unica", "fijas": ["LPE.0381 Método gravimétrico"], "opciones": []},
-  518:{"tipo": "unica", "fijas": ["LPE.0380 Método turbidimétrico"], "opciones": []},
-  519:{"tipo": "unica", "fijas": ["ISO 9648:1988"], "opciones": []},
-  520:{"tipo": "unica", "fijas": ["LPE.0366 Método nefelométrico"], "opciones": []},
-  521:{"tipo": "unica", "fijas": ["IRAM 5515-1:2018** ISO 3961:2018"], "opciones": []},
-  522:{"tipo": "unica", "fijas": ["LPE.0330 Absorción Atómica - Llama*** LPE.0346 Absorción Atómica - Horno de Grafito"], "opciones": []},
-  600:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método A (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método A (solución salina)", "ICC 155:1994 / AACC 38-12.02 / Gafta 25.2", "ISO 21415-2:2015"], "default": 0},
-  601:{"tipo": "unica", "fijas": ["ISO 21415-2:2015"], "opciones": []},
-  602:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método A (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método A (solución salina)", "ICC 155:1994 / AACC 38-12.02 / Gafta 25.2", "ISO 21415-2:2015"], "default": 0},
-  603:{"tipo": "unica", "fijas": ["ISO 21415-2:2015"], "opciones": []},
-  604:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método B (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método B (solución salina)", "ICC 155:1994 / AACC 38-12.02 / Gafta 25.2", "ISO 21415-2:2015"], "default": 0},
-  605:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método B (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método B (solución salina)", "ICC 155:1994 / AACC 38-12.02 / Gafta 25.2", "ISO 21415-2:2015"], "default": 0},
-  606:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método A (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método A (solución salina)", "AACC 38-12.02", "ISO 21415-4:2006"], "default": 0},
-  607:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método A (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método A (solución salina)", "AACC 38-12.02", "ISO 21415-4:2006"], "default": 0},
-  608:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método B (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método B (solución salina)", "AACC 38-12.02", "ISO 21415-4:2006"], "default": 0},
-  609:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método B (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método B (solución salina)", "AACC 38-12.02", "ISO 21415-4:2006"], "default": 0},
-  610:{"tipo": "unica", "fijas": ["IRAM 15854-3:2016"], "opciones": []},
-  611:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método A (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método A (solución salina)", "ICC 155:1994 / AACC 38-12.02 / Gafta 25.2", "ISO 21415-2:2015"], "default": 0},
-  612:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método A (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método A (solución salina)", "ICC 155:1994 / AACC 38-12.02 / Gafta 25.2", "ISO 21415-2:2015"], "default": 0},
-  613:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método B (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método B (solución salina)", "ICC 155:1994 / AACC 38-12.02 / Gafta 25.2", "ISO 21415-2:2015"], "default": 0},
-  614:{"tipo": "alternativa", "fijas": [], "opciones": ["LPE.0156 basado en IRAM 15864-1:2013 Método B (agua destilada)", "LPE.0033 basado en IRAM 15864-2:2013 Método B (solución salina)", "ICC 155:1994 / AACC 38-12.02 / Gafta 25.2", "ISO 21415-2:2015"], "default": 0},
-  615:{"tipo": "alternativa", "fijas": [], "opciones": ["IRAM 15862:2019", "ISO 3093:2009"], "default": 0},
-  616:{"tipo": "alternativa", "fijas": [], "opciones": ["IRAM 15862:2019", "ISO 3093:2009"], "default": 0},
-  617:{"tipo": "alternativa", "fijas": [], "opciones": ["IRAM 15855:2024", "ISO 5530-1:2013"], "default": 0},
-  618:{"tipo": "alternativa", "fijas": [], "opciones": ["IRAM 15855:2024", "ISO 5530-1:2013"], "default": 0},
-  619:{"tipo": "alternativa", "fijas": [], "opciones": ["IRAM 15857:2012", "UNE ISO 27971:2015"], "default": 0},
-  620:{"tipo": "alternativa", "fijas": [], "opciones": ["IRAM 15857:2012", "UNE ISO 27971:2015"], "default": 0},
-  621:{"tipo": "complementaria", "fijas": ["Farinograma: IRAM 15855:2024 / ISO 5530-1:2013", "Alveograma: IRAM 15857:2012 / UNE ISO 27971:2015"], "opciones": []},
-  622:{"tipo": "complementaria", "fijas": ["Farinograma: IRAM 15855:2024 / ISO 5530-1:2013", "Alveograma: IRAM 15857:2012 / UNE ISO 27971:2015"], "opciones": []},
-  623:{"tipo": "unica", "fijas": ["Ver cada ensayo"], "opciones": []},
-  700:{"tipo": "unica", "fijas": ["Según ensayo sin fungicida"], "opciones": []},
-  701:{"tipo": "unica", "fijas": ["LPE.0265"], "opciones": []},
-  702:{"tipo": "unica", "fijas": ["E.E.A. INTA Oliveros"], "opciones": []},
-  703:{"tipo": "unica", "fijas": ["ISTA Rules"], "opciones": []},
-  704:{"tipo": "unica", "fijas": ["ISTA Rules"], "opciones": []},
-  705:{"tipo": "unica", "fijas": ["ISTA Rules Cap. 5"], "opciones": []},
-  706:{"tipo": "unica", "fijas": ["ISTA Rules"], "opciones": []},
-  707:{"tipo": "unica", "fijas": ["ISTA Rules"], "opciones": []},
-  708:{"tipo": "unica", "fijas": ["ISTA Rules"], "opciones": []},
-  709:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  710:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  711:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  712:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  713:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  714:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  715:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  716:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  717:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  718:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  719:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  720:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  721:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  722:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  723:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  724:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  725:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  726:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  727:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  728:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  729:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  730:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  731:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  732:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  733:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  734:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  735:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  736:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  737:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  738:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  739:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  740:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  741:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  742:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  743:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  744:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  745:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  746:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  747:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  748:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  749:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  750:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 4:2023"], "opciones": []},
-  751:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  752:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  753:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  754:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  755:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  756:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  757:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  758:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  759:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  760:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  761:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  762:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  763:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  764:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  765:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  766:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  767:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  768:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  769:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  770:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulos 5:2023 y 13:2023"], "opciones": []},
-  771:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  772:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  773:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  774:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  775:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  776:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  777:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  778:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  779:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  780:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  781:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  782:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  783:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  784:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  785:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  786:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  787:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  788:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  789:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  790:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  791:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  792:{"tipo": "unica", "fijas": ["Reglas ISTA - Capítulo 5:2023"], "opciones": []},
-  793:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  794:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  795:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  796:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  797:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  798:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  799:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  800:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  801:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  802:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  803:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  804:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  805:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  806:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  807:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  808:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  809:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  810:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  811:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  812:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  813:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  814:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  815:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  816:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  817:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  818:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  819:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  820:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  821:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  822:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  823:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  824:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  825:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  826:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  827:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  828:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  829:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  830:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  831:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  832:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  833:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 3:2023"], "opciones": []},
-  834:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 6:2023"], "opciones": []},
-  835:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 6:2023"], "opciones": []},
-  836:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 6:2023"], "opciones": []},
-  837:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 6:2023"], "opciones": []},
-  838:{"tipo": "unica", "fijas": ["Reglas ISTA  Capítulo 6:2023"], "opciones": []},
-  839:{"tipo": "unica", "fijas": ["LPE.0008"], "opciones": []},
-  840:{"tipo": "unica", "fijas": ["ISTA Rules Cap.15"], "opciones": []},
-  841:{"tipo": "unica", "fijas": ["AOSA Cold Test"], "opciones": []},
-  842:{"tipo": "unica", "fijas": ["ISTA Envejecimiento Acelerado"], "opciones": []},
-  843:{"tipo": "unica", "fijas": ["ISTA Cold Test"], "opciones": []},
-  844:{"tipo": "unica", "fijas": ["ISTA Cold Test"], "opciones": []},
-  900:{"tipo": "complementaria", "fijas": ["Materia orgánica (IRAM-SAGyP 29571-2:2011)", "Nitratos (LPE.0379 Método colorimétrico) - Se informa nitratos y humedad", "Fósforo Bray y Kurtz I* (LPE.0227 Método colorimétrico)", "pH (IRAM-SAGyP 29574)"], "opciones": []},
-  901:{"tipo": "complementaria", "fijas": ["Materia orgánica (IRAM-SAGyP 29571-2:2011)", "Nitrógeno total  (LPE.0112 basado IRAM/SAGyP 29572:2018)", "Fósforo Bray y Kurtz I* (LPE.0227 Método colorimétrico)", "pH (IRAM-SAGyP 29574)"], "opciones": []},
-  902:{"tipo": "complementaria", "fijas": ["Materia orgánica (IRAM-SAGyP 29571-2:2011)", "Nitratos (LPE.0379 Método colorimétrico) - Se informa nitratos y humedad", "Fósforo Bray y Kurtz I* (LPE.0227 Método colorimétrico)", "pH (IRAM-SAGyP 29574)", "Sulfato (LPE.0256 Método turbidimétrico)"], "opciones": []},
-  903:{"tipo": "complementaria", "fijas": ["Materia orgánica (IRAM-SAGyP 29571-2:2011)", "Nitrógeno total (LPE.0112 basado IRAM/SAGyP 29572:2018)", "Fósforo Bray y Kurtz I* (LPE.0227 Método colorimétrico)", "pH (IRAM-SAGyP 29574)", "Sulfato (LPE.0256 Método turbidimétrico)"], "opciones": []},
-  904:{"tipo": "complementaria", "fijas": ["Materia orgánica (IRAM-SAGyP 29571-2:2011)", "Nitratos (LPE.0379 Método colorimétrico) - Se informa nitratos y humedad", "Fósforo Bray y Kurtz I* (LPE.0227 Método colorimétrico)", "Fósforo Bray y Kurtz II (LPE.0378 Método colorimétrico)", "pH (IRAM-SAGyP 29574)", "Sulfato (LPE.0256 Método turbidimétrico)", "Potasio (LPE.0172 Absorción atómica - Llama)", "Calcio (LPE.0225 Absorción atómica - Llama)", "Magnesio (LPE.0225 Absorción atómica - Llama)", "Sodio (LPE.0216 Absorción atómica - Llama)", "Hidrógeno (LPE.0258 Método de cálculo)", "Sales Solubles (SAMLA 2004)", "Capacidad de Intercambio Catiónico (LPE.0238 Método titulométrico)", "% Saturación de bases"], "opciones": []},
-  905:{"tipo": "complementaria", "fijas": ["Materia orgánica (IRAM-SAGyP 29571-2:2011)", "Nitrógeno total (LPE.0112 basado IRAM/SAGyP 29572:2018)", "Fósforo Bray y Kurtz I * (LPE.0227 Método colorimétrico)", "Fósforo Bray y Kurtz II (LPE.0378 Método colorimétrico)", "pH (IRAM-SAGyP 29574)", "Sulfato (LPE.0256 Método turbidimétrico)", "Potasio (LPE.0172 Absorción atómica - Llama)", "Calcio (LPE.0225 Absorción atómica - Llama)", "Magnesio (LPE.0225 Absorción atómica - Llama)", "Sodio (LPE.0216 Absorción atómica - Llama)", "Hidrógeno (LPE.0258 Método de Cálculo)", "Sales Solubles (SAMLA 2004)", "Capacidad de Intercambio Catiónico (LPE.0238 Método titulométrico)", "% Saturación de bases"], "opciones": []},
-  906:{"tipo": "unica", "fijas": ["LPE.0258 Método de cálculo (% de Saturación de bases; Hidrógeno) LPE.0225 Absorción atómica - Llama (Calcio; Magnesio) LPE.0172 Absorción atómica - Llama (Potasio) LPE.0216 Absorción atómica - Llama (Sodio) LPE.0238 Método titulométrico (C.I.C.)"], "opciones": []},
-  907:{"tipo": "unica", "fijas": ["LPE.0225 Absorción atómica - Llama"], "opciones": []},
-  908:{"tipo": "unica", "fijas": ["LPE.0238 Método titulométrico"], "opciones": []},
-  909:{"tipo": "unica", "fijas": ["LPE.0178 Calcinación"], "opciones": []},
-  910:{"tipo": "unica", "fijas": ["IRAM-SAGyP 29571-2:2011"], "opciones": []},
-  911:{"tipo": "unica", "fijas": ["SAMLA 2004"], "opciones": []},
-  912:{"tipo": "unica", "fijas": ["LPE.0227 Método colorimétrico"], "opciones": []},
-  913:{"tipo": "unica", "fijas": ["LPE.0378 Método colorimétrico"], "opciones": []},
-  914:{"tipo": "unica", "fijas": ["IRAM-SAGyP 29570-2:2014"], "opciones": []},
-  915:{"tipo": "unica", "fijas": ["LPE.0258 Método de cálculo"], "opciones": []},
-  916:{"tipo": "unica", "fijas": ["LPE.0259 Secado en estufa"], "opciones": []},
-  917:{"tipo": "unica", "fijas": ["LPE.0225 Absorción atómica - Llama"], "opciones": []},
-  918:{"tipo": "unica", "fijas": ["IRAM-SAGyP 29571-2:2011"], "opciones": []},
-  919:{"tipo": "unica", "fijas": ["LPE.0184"], "opciones": []},
-  920:{"tipo": "unica", "fijas": ["SAMLA 2004"], "opciones": []},
-  921:{"tipo": "unica", "fijas": ["LPE.0148 Absorción atómica - Llama"], "opciones": []},
-  922:{"tipo": "unica", "fijas": ["LPE.0148 Absorción atómica - Llama"], "opciones": []},
-  923:{"tipo": "unica", "fijas": ["LPE.0148 Absorción atómica - Llama"], "opciones": []},
-  924:{"tipo": "unica", "fijas": ["LPE.0148 Absorción atómica - Llama"], "opciones": []},
-  925:{"tipo": "unica", "fijas": ["LPE.0379 Método colorimétrico"], "opciones": []},
-  926:{"tipo": "unica", "fijas": ["LPE.0379 Método colorimétrico"], "opciones": []},
-  927:{"tipo": "unica", "fijas": ["LPE.0185"], "opciones": []},
-  928:{"tipo": "unica", "fijas": ["LPE.0112 basado IRAM/SAGyP 29572:2018"], "opciones": []},
-  929:{"tipo": "unica", "fijas": ["IRAM-SAGyP 29574:2021"], "opciones": []},
-  930:{"tipo": "unica", "fijas": ["LPE.0109 Método potenciométrico"], "opciones": []},
-  931:{"tipo": "unica", "fijas": ["LPE.0172 Absorción atómica - Llama"], "opciones": []},
-  932:{"tipo": "unica", "fijas": ["SAMLA 2004"], "opciones": []},
-  933:{"tipo": "unica", "fijas": ["LPE.0216 Absorción atómica - Llama"], "opciones": []},
-  934:{"tipo": "unica", "fijas": ["LPE.0256 Método turbidimétrico"], "opciones": []},
-  935:{"tipo": "unica", "fijas": ["SAMLA 2004"], "opciones": []},
-  950:{"tipo": "unica", "fijas": ["IRAM 22452:2006"], "opciones": []},
-  951:{"tipo": "unica", "fijas": ["AOAC 980.02:2005"], "opciones": []},
-  952:{"tipo": "unica", "fijas": ["AOAC 980.02:2005"], "opciones": []},
-  953:{"tipo": "unica", "fijas": ["AOAC 980.02:2005"], "opciones": []},
-  954:{"tipo": "unica", "fijas": ["AOAC 980.02:2005"], "opciones": []},
-  955:{"tipo": "unica", "fijas": ["AOAC 960.04:2005"], "opciones": []},
-  956:{"tipo": "unica", "fijas": ["AOAC 945.03:2005"], "opciones": []},
-  957:{"tipo": "unica", "fijas": ["AOAC 965.09:2005"], "opciones": []},
-  958:{"tipo": "unica", "fijas": ["AOAC 965.09:2005"], "opciones": []},
-  959:{"tipo": "unica", "fijas": ["ISO 649-2:1981"], "opciones": []},
-  960:{"tipo": "unica", "fijas": ["AOAC 960.03:2008"], "opciones": []},
-  961:{"tipo": "unica", "fijas": ["AOAC 993.31:2005"], "opciones": []},
-  962:{"tipo": "unica", "fijas": ["AOAC 963.03:2005"], "opciones": []},
-  963:{"tipo": "complementaria", "fijas": ["AOAC 977.01:2008", "AOAC 970.01:2005"], "opciones": []},
-  964:{"tipo": "unica", "fijas": ["AOAC 960.01:2005"], "opciones": []},
-  965:{"tipo": "complementaria", "fijas": ["AOAC 957.02:2005", "AOAC 958.01:2005"], "opciones": []},
-  966:{"tipo": "unica", "fijas": ["AOAC 950.01:2005"], "opciones": []},
-  967:{"tipo": "unica", "fijas": ["AOAC 965.08:2005"], "opciones": []},
-  968:{"tipo": "unica", "fijas": ["IRAM 22452:2006"], "opciones": []},
-  969:{"tipo": "unica", "fijas": ["AOAC 964.01:2005"], "opciones": []},
-  970:{"tipo": "unica", "fijas": ["AOAC 920.03:2005"], "opciones": []},
-  971:{"tipo": "unica", "fijas": ["AOAC 955.04:2005"], "opciones": []},
-  972:{"tipo": "unica", "fijas": ["IFDC TSU-AL AP-1015-B"], "opciones": []},
-  973:{"tipo": "unica", "fijas": ["AOAC 955.04:2005"], "opciones": []},
-  974:{"tipo": "unica", "fijas": ["AOAC 955.04:2005"], "opciones": []},
-  975:{"tipo": "unica", "fijas": ["AOAC 955.04:2005"], "opciones": []},
-  976:{"tipo": "complementaria", "fijas": ["AOAC 955.04:2005", "IFDC TSU-AL AP-1015-B"], "opciones": []},
-  977:{"tipo": "unica", "fijas": ["AOAC 983.02:2005"], "opciones": []},
-  978:{"tipo": "unica", "fijas": ["AOAC 983.02:2005"], "opciones": []},
-  979:{"tipo": "unica", "fijas": ["AOAC 974.01:2005"], "opciones": []},
-  980:{"tipo": "unica", "fijas": ["AOAC 974.01:2005"], "opciones": []},
-  981:{"tipo": "unica", "fijas": ["AOAC 965.09:2005"], "opciones": []},
-  982:{"tipo": "unica", "fijas": ["AOAC 965.09:2005"], "opciones": []},
-  983:{"tipo": "unica", "fijas": ["AOAC 965.09:2005"], "opciones": []},
-  984:{"tipo": "unica", "fijas": ["AOAC 965.09:2005"], "opciones": []},
-  1000:{"tipo":"gm_cualit","fijas":["LPE.0027 PCR en Tiempo Real"],"opciones":[]},
-  1001:{"tipo":"gm_cuantit","fijas":["LPE.0027 PCR en Tiempo Real"],"opciones":[]},
-  1002:{"tipo":"unica","fijas":["LPE.0027 PCR en Tiempo Real"],"opciones":[]},
-  1003:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-  1004:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-  1005:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-  1006:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-  1007:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-  1008:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-  1009:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-  1010:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-  1011:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-  1012:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-  1013:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-  1014:{"tipo":"unica","fijas":["ELISA"],"opciones":[]},
-};
+
 let CATEGORIAS_SELECTOR=[];
 // --- Definiciones base recuperadas de index31-8.html ---
 const TODAY=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
@@ -1024,16 +493,6 @@ let GM_EVENTOS={};
 
 function openEnsayoModal(){MODAL_SEL=[];MODAL_MAT=null;MODAL_ENS=null;MODAL_TAB=null;MODAL_CAT=null;renderModalMatrizGrilla();}
 
-function resolverDefaultTec(tinfo,mat){
-  if(!tinfo||!tinfo.opciones||tinfo.opciones.length===0)return 0;
-  if(!tinfo.mat_default)return tinfo.default||0;
-  var matL=(mat||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  var esAgua=matL==='agua';
-  var esHarinaTrigo=matL.includes('harina')&&matL.includes('trigo');
-  if(tinfo.mat_default.incluye_agua!==undefined&&esAgua)return tinfo.mat_default.incluye_agua;
-  if(tinfo.mat_default.incluye_harina_trigo!==undefined&&esHarinaTrigo)return tinfo.mat_default.incluye_harina_trigo;
-  return tinfo.default||0;
-}
 
 /* PASO 1a: Grilla de categorías */
 function renderModalMatrizGrilla(){
@@ -1156,7 +615,7 @@ function renderModalEnsayo(q){
   ];
   var yaIds=MODAL_SEL.map(function(s){return s.eid;});
   var grupos=subgrupos.map(function(g){return{label:g.label,items:ensFiltrados.filter(function(e){return g.fn(e);}).slice().sort(function(a,b){return a.n.localeCompare(b.n,'es');})};}).filter(function(g){return g.items.length>0;});
-  var listHtml=grupos.length===0?'<div class="modal-none">Sin resultados</div>':grupos.map(function(g){return'<div class="modal-group">'+g.label+'</div>'+g.items.map(function(en){var yaEsta=yaIds.indexOf(en.id)!==-1;return'<div class="modal-mat-item'+(yaEsta?' modal-ya-sel':'')+'" data-eid="'+en.id+'"><span class="modal-item-txt">'+en.n+(yaEsta?'<span class="modal-ya-badge"> \u2713 seleccionado \u2014 clic para quitar</span>':'')+'<br><span class="modal-item-sub" style="color:#4b5563;">'+en.t+'</span>'+(en.a?'<br><span class="modal-item-sub" style="color:#9ca3af;font-style:italic;">'+en.a+'</span>':'')+'<br><span class="modal-item-sub">$ '+fmt(en.p)+'</span></span>'+(yaEsta?'':'<span class="modal-mat-arrow">\u203a</span>')+'</div>';}).join('');}).join('');
+  var listHtml=grupos.length===0?'<div class="modal-none">Sin resultados</div>':grupos.map(function(g){return'<div class="modal-group">'+g.label+'</div>'+g.items.map(function(en){var yaEsta=yaIds.indexOf(en.id)!==-1;return'<div class="modal-mat-item'+(yaEsta?' modal-ya-sel':'')+'" data-eid="'+en.id+'"><span class="modal-item-txt">'+en.n+(en.esDefault?'<span class="modal-ya-badge" style="background:#fef9c3;color:#854d0e;border-color:#fde047;"> \u2605 predeterminada</span>':'')+(yaEsta?'<span class="modal-ya-badge"> \u2713 seleccionado \u2014 clic para quitar</span>':'')+'<br><span class="modal-item-sub" style="color:#4b5563;">'+en.t+'</span>'+(en.a?'<br><span class="modal-item-sub" style="color:#9ca3af;font-style:italic;">'+en.a+'</span>':'')+'<br><span class="modal-item-sub">$ '+fmt(en.p)+'</span></span>'+(yaEsta?'':'<span class="modal-mat-arrow">\u203a</span>')+'</div>';}).join('');}).join('');
   var tabsHtml=tabsDisp.map(function(t){var cnt=ens.filter(function(e){return t.fn(e);}).length;var active=t.label===MODAL_TAB;return'<button class="modal-tab'+(active?' modal-tab-active':'')+'" data-tab="'+t.label+'">'+t.label+'<span class="modal-tab-cnt">'+cnt+'</span></button>';}).join('');
   var sel=MODAL_SEL.length;
   _showModal(
@@ -1201,31 +660,10 @@ function renderModalEnsayo(q){
       }
       MULTITOX_SEL=[];renderModalMultitox(eid,MODAL_MAT);return;
     }
-    var tinfo=TEC_MAP[eid];
-    if(tinfo&&tinfo.opciones&&tinfo.opciones.length>0){renderModalTecnica();}
-    else{var tec=tinfo?(tinfo.fijas||[]).join(' + '):'';MODAL_SEL.push({eid:eid,tec:tec,mat:MODAL_MAT||''});var cur=document.getElementById('msearch');var sy=document.getElementById('mlist')?document.getElementById('mlist').scrollTop:0;renderModalEnsayo(cur?cur.value:'');var ml=document.getElementById('mlist');if(ml)ml.scrollTop=sy;}
+    var eCat=getE(eid);var tec=eCat?eCat.t:'';MODAL_SEL.push({eid:eid,tec:tec,mat:MODAL_MAT||''});var cur=document.getElementById('msearch');var sy=document.getElementById('mlist')?document.getElementById('mlist').scrollTop:0;renderModalEnsayo(cur?cur.value:'');var ml=document.getElementById('mlist');if(ml)ml.scrollTop=sy;
   });
   document.getElementById('mback').addEventListener('click',function(){MODAL_TAB=null;renderModalMatrizGrilla();});
   _bindCancelConfirm();
-}
-
-/* PASO 3: Técnica */
-function renderModalTecnica(){
-  var ex=document.getElementById('ens-modal');if(ex)ex.remove();
-  var tinfo=TEC_MAP[MODAL_ENS.id];
-  var fijas=tinfo.fijas||[];
-  var opciones=tinfo.opciones||[];
-  var defaultIdx=resolverDefaultTec(tinfo,MODAL_MAT);
-  var fijasHtml=fijas.length?'<div style="padding:8px 1rem 4px;"><span style="font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;">T\u00e9cnica fija</span>'+fijas.map(function(f){return'<div style="font-size:11.5px;color:#6b7280;padding:3px 0;">'+f+'</div>';}).join('')+'</div><div class="modal-group">Eleg\u00ed la t\u00e9cnica</div>':'<div class="modal-group">Eleg\u00ed la t\u00e9cnica</div>';
-  var listHtml=fijasHtml+opciones.map(function(op,i){var esDef=i===defaultIdx;return'<div class="modal-mat-item'+(esDef?' modal-tec-default':'')+'" data-tec="'+i+'"><span class="modal-item-txt">'+op+(esDef?'<span class="modal-ya-badge"> \u2605 predeterminada para '+MODAL_MAT+'</span>':'')+'</span><span class="modal-mat-arrow">\u203a</span></div>';}).join('');
-  _showModal(
-    '<button class="modal-back" id="mback">\u2190</button><h3 style="font-size:12px;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+MODAL_ENS.n+'</h3>',
-    listHtml,
-    '<span class="modal-count">Paso 3 \u2014 T\u00e9cnica anal\u00edtica</span><button class="modal-cancel" id="mcancel">Cancelar</button>'
-  );
-  document.getElementById('mback').addEventListener('click',function(){renderModalEnsayo('');});
-  document.getElementById('mlist').addEventListener('click',function(e){var item=e.target.closest('[data-tec]');if(!item)return;var idx=Number(item.dataset.tec);var tec=(fijas.length?fijas.join(' + ')+' + ':'')+opciones[idx];MODAL_SEL.push({eid:MODAL_ENS.id,tec:tec,mat:MODAL_MAT||''});renderModalEnsayo('');});
-  _bindCancelConfirm(true);
 }
 
 /* PASO GM: Selector de eventos OGM */
@@ -1383,14 +821,7 @@ function diffVersiones(vieja,nueva){
   return cambios;
 }
 
-const RPOC_MOTIVOS=[
-  {k:'a',l:'a. Ensayo solicitado no incluido en el LEO'},
-  {k:'b',l:'b. Matriz solicitada no incluida en el alcance del LEO'},
-  {k:'c',l:'c. Modificación a la técnica o condiciones de ensayo'},
-  {k:'d',l:'d. Grandes volúmenes de trabajo u otras solicitudes especiales'},
-  {k:'e',l:'e. Solicitud de declaración de conformidad con especificación/norma'},
-  {k:'f',l:'f. Derivación a laboratorio externo'},
-];
+let RPOC_MOTIVOS=[];
 const RPOC_ESTADOS={
   borrador:{l:'Borrador',color:'#fb923c',bg:'#fff4e6'},
   en_revision_adm:{l:'En revisión Adm',color:'#f59e0b',bg:'#fffbeb'},
@@ -1506,7 +937,7 @@ const BASE = `/sites/${SITE_ID}/drive/items/${ITEM_ID}/workbook`;
 
 // --- Lectura inicial (reemplaza loadStorage) ---
 async function loadStorage(){
-  const [pres, resp, log, fueraLeo, config, catalogoLeo, eventosGm, matrizEnsayos, categoriasMatriz, observaciones] = await Promise.all([
+  const [pres, resp, log, fueraLeo, config, catalogoLeo, eventosGm, matrizEnsayos, categoriasMatriz, observaciones, motivosRpoc] = await Promise.all([
     graphFetch(`${BASE}/tables('TablaPresupuestos')/rows`),
     graphFetch(`${BASE}/tables('TablaResponsables')/rows`),
     graphFetch(`${BASE}/tables('TablaLogFirmas')/rows`),
@@ -1516,13 +947,20 @@ async function loadStorage(){
     graphFetch(`${BASE}/tables('TablaEventosGM')/rows`),
     graphFetch(`${BASE}/tables('TablaMatrizEnsayos')/rows`),
     graphFetch(`${BASE}/tables('TablaCategoriasMatriz')/rows`),
-    graphFetch(`${BASE}/tables('TablaObservaciones')/rows`)
+    graphFetch(`${BASE}/tables('TablaObservaciones')/rows`),
+    graphFetch(`${BASE}/tables('TablaMotivosRPOC')/rows`)
   ]);
 
   // TablaObservaciones: columnas Clave, Texto
   OBS_LISTA = observaciones.value.map(r => {
     const v = r.values[0];
     return { k: v[0], t: v[1] };
+  });
+
+  // TablaMotivosRPOC: columnas Clave, Texto
+  RPOC_MOTIVOS = motivosRpoc.value.map(r => {
+    const v = r.values[0];
+    return { k: v[0], l: v[1] };
   });
 
   // TablaCategoriasMatriz: columnas Categoria, Matriz — se reconstruye la lista agrupada [{cat, mats:[...]}]
@@ -1546,12 +984,13 @@ async function loadStorage(){
     MATRIZ_ENSAYOS[matriz].push(eid);
   });
 
-  // TablaCatalogoLEO: columnas ID, Nombre, Alcance, Tecnica, PrecioLeo, PrecioConsorcio, MuestraMinima, Grupo, PrecioProvisorio
+  // TablaCatalogoLEO: columnas ID, Nombre, Alcance, Tecnica, PrecioLeo, PrecioConsorcio, MuestraMinima, Grupo, PrecioProvisorio, Default
   EN_ALL = catalogoLeo.value.map(r => {
     const v = r.values[0];
     const item = { id: Number(v[0]), n: v[1], a: v[2], t: v[3], p: Number(v[4])||0, m: v[6], g: v[7] };
     if(v[5] !== '' && v[5] != null) item.pc = Number(v[5]);
     if(v[8] === 'SI' || v[8] === true) item.precioLeoProvisorio = true;
+    if(v[9] === 'S' || v[9] === 'SI' || v[9] === true) item.esDefault = true;
     return item;
   });
 
@@ -2949,8 +2388,17 @@ function bindForm(){
   });
   document.querySelectorAll('[data-ra]').forEach(function(el){el.addEventListener('change',function(){var r=APP.form.rows.find(function(x){return x.uid==el.dataset.ra;});if(!r)return;r.aitem=el.value;render();});});
   document.querySelectorAll('[data-rm]').forEach(function(el){el.addEventListener('input',function(){var r=APP.form.rows.find(function(x){return x.uid==el.dataset.rm;});if(!r)return;r.matriz=el.value;});});
-  document.querySelectorAll('[data-rn]').forEach(function(el){el.addEventListener('input',function(){var r=APP.form.rows.find(function(x){return x.uid==el.dataset.ruid;});if(!r)return;r[el.dataset.rn]=(el.type==='number'||el.dataset.num)?Number(el.value):el.value;render();});});
-  document.querySelectorAll('[data-del]').forEach(function(el){el.addEventListener('click',function(){APP.form.rows=APP.form.rows.filter(function(r){return r.uid!=el.dataset.del;});render();});});
+  document.querySelectorAll('[data-rn]').forEach(function(el){el.addEventListener('input',function(){
+    var r=APP.form.rows.find(function(x){return x.uid==el.dataset.ruid;});
+    if(!r)return;
+    r[el.dataset.rn]=(el.type==='number'||el.dataset.num)?Number(el.value):el.value;
+    if(el.dataset.rn==='bonif'&&r.eid&&!r.fueraLeo){
+      if(Number(r.bonif)>0){ convertirAPROCSiHaceFalta(); }
+      else{ revertirAPRSiHaceFalta(); }
+    }
+    render();
+  });});
+  document.querySelectorAll('[data-del]').forEach(function(el){el.addEventListener('click',function(){APP.form.rows=APP.form.rows.filter(function(r){return r.uid!=el.dataset.del;});revertirAPRSiHaceFalta();render();});});
   document.getElementById('addrow')&&document.getElementById('addrow').addEventListener('click',function(){openEnsayoModal();});
   document.getElementById('toggle-pie-entrega')&&document.getElementById('toggle-pie-entrega').addEventListener('click',function(){APP.ui.showEntrega=!APP.ui.showEntrega;render();});
   document.getElementById('btn-show-obs')&&document.getElementById('btn-show-obs').addEventListener('click',function(){APP.ui.showObs=!APP.ui.showObs;render();});
@@ -3515,6 +2963,34 @@ function nextRPOCNumero(){
   return 'RPOC '+hoy+'-'+String(max+1).padStart(4,'0');
 }
 
+function convertirAPROCSiHaceFalta(){
+  if(APP.form.tipo==='RPOC')return;
+  var numeroViejo=APP.form.numero;
+  APP.form.tipo='RPOC';
+  APP.form._autoRPOC=true;
+  if(APP.form.rpocTipo===undefined)APP.form.rpocTipo='tecnica';
+  if(!APP.form.rpocMotivos)APP.form.rpocMotivos=[];
+  if(APP.form.rpocDescripcion===undefined)APP.form.rpocDescripcion='';
+  if(APP.form.revAdminNombre===undefined){APP.form.revAdminNombre='';APP.form.tsRevAdmin='';APP.form.revAdminNota='';}
+  if(APP.form.revCalidadNombre===undefined){APP.form.revCalidadNombre='';APP.form.tsRevCalidad='';APP.form.revCalidadNota='';}
+  if(APP.form.aproboNombre===undefined){APP.form.aproboNombre='';APP.form.tsAprobo='';}
+  if(!/^RPOC /.test(APP.form.numero||'')){
+    APP.form.numero=nextRPOCNumero();
+  }
+  alert('Este ensayo tiene una bonificación cargada, así que el documento pasó automáticamente a RPOC (antes: '+numeroViejo+').\nNuevo número: '+APP.form.numero);
+}
+function revertirAPRSiHaceFalta(){
+  if(APP.form.tipo!=='RPOC'||!APP.form._autoRPOC)return;
+  var hayBonifLEO=(APP.form.rows||[]).some(function(r){return r.eid&&!r.fueraLeo&&Number(r.bonif)>0;});
+  if(hayBonifLEO)return;
+  var numeroViejo=APP.form.numero;
+  APP.form.tipo='PR';
+  APP.form._autoRPOC=false;
+  if(!/^PR /.test(APP.form.numero||'')){
+    APP.form.numero=nextPRNumero();
+  }
+  alert('Ya no queda ningún ensayo LEO con bonificación, así que el documento volvió automáticamente a PR (antes: '+numeroViejo+').\nNuevo número: '+APP.form.numero);
+}
 function newRPOC(){
   return {
     id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),
