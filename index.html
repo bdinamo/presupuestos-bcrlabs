@@ -400,6 +400,10 @@ function dedupTecnicaLineas(texto){
   partes=limpio.split(/\.\s+(?=[A-ZÁÉÍÓÚÑ0-9])/).map(function(p){return p.trim();}).filter(Boolean);
   return partes.length?partes:[limpio];
 }
+function nl2br(texto){
+  if(!texto) return '';
+  return String(texto).replace(/\r\n|\r|\n/g,'<br>');
+}
 function nombreArchivoDoc(doc,prefijo){
   var base=(doc&&doc.numero)?doc.numero:'documento';
   var cliente=(doc&&doc.cliente)?doc.cliente.trim():'';
@@ -2865,9 +2869,9 @@ function generarPDF(){
     +'<div class="total-final"><span>TOTAL A PAGAR</span><span>'+fmtC(total)+'</span></div>'
     +'<div style="font-size:9px;color:#374151;margin-top:2px;">Monto final expresado en pesos argentinos</div>'
     +'</div>'
-    +((doc.obsSeleccionadas&&doc.obsSeleccionadas.length)||doc.obsManual?'<div class="franja">OBSERVACIONES DEL CLIENTE POR ÍTEM DE ENSAYO</div><div class="pie-bloque">'+(doc.obsSeleccionadas||[]).map(function(kk){var o=OBS_LISTA.find(function(x){return x.k===kk;});return o?'<p style="margin-bottom:3px;">• '+o.t+'</p>':'';}).join('')+(doc.obsManual?'<p style="margin-bottom:3px;">• '+doc.obsManual+'</p>':'')+'</div>':'')
+    +((doc.obsSeleccionadas&&doc.obsSeleccionadas.length)||doc.obsManual?'<div class="franja">OBSERVACIONES DEL CLIENTE POR ÍTEM DE ENSAYO</div><div class="pie-bloque">'+(doc.obsSeleccionadas||[]).map(function(kk){var o=OBS_LISTA.find(function(x){return x.k===kk;});return o?'<p style="margin-bottom:3px;">• '+nl2br(o.t)+'</p>':'';}).join('')+(doc.obsManual?'<p style="margin-bottom:3px;">• '+nl2br(doc.obsManual)+'</p>':'')+'</div>':'')
     +(doc.diasEntrega?'<div class="franja">TIEMPO DE ENTREGA DE RESULTADOS</div><div class="pie-bloque"><p>Entrega total: <strong>'+doc.diasEntrega+'</strong> días hábiles desde la recepción de las muestras y la solicitud de ensayos con la información requerida.</p><p style="font-size:9px;color:#374151;">Tiempo de entrega estimado. Puede variar conforme a la demanda operativa al momento de la recepción.</p></div>':'')
-    +(doc.reqEspeciales?'<div class="franja">REQUERIMIENTOS ESPECIALES DEL CLIENTE POR ÍTEM DE ENSAYO</div><div class="pie-bloque"><p>'+doc.reqEspeciales+'</p></div>':'')
+    +(doc.reqEspeciales?'<div class="franja">REQUERIMIENTOS ESPECIALES DEL CLIENTE POR ÍTEM DE ENSAYO</div><div class="pie-bloque"><p>'+nl2br(doc.reqEspeciales)+'</p></div>':'')
     +'<div class="franja">INFORMACIÓN PARA RECEPCIÓN / ENVÍO DE MUESTRAS</div>'
     +'<div class="pie-bloque"><p><strong>SOLICITUD DE ENSAYOS:</strong> Las muestras deben estar acompañadas de la solicitud de ensayo correspondiente.</p>'
     +'<p><strong>ENVÍO Y RECEPCIÓN:</strong> Las muestras deben ser enviadas o entregadas personalmente en AV Jorge Newbery 7643- S2006- Rosario, Santa Fe (BCRlabs) en el horario de 8 a 20 h.</p>'
