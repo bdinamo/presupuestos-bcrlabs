@@ -865,11 +865,21 @@ function renderRPOC(){
 
   // Usar renderForm() como base y prepend el header RPOC
   var formHtml=renderForm();
-  // Insertar el header RPOC después del primer </div> del content
-  var insertPoint=formHtml.indexOf('<div class="card">');
-  if(insertPoint>=0){
-    var afterCard=formHtml.indexOf('>',insertPoint)+1;
-    formHtml=formHtml.slice(0,afterCard)+rpocHeader+formHtml.slice(afterCard);
+  // Insertar el header RPOC (motivos) antes de "Datos del cliente".
+  // Si hay ensayos fuera de LEO, ese bloque ya trae sus propios motivos: no se duplica.
+  var hayFueraLeoHdr=(doc.rows||[]).some(function(r){return r.fueraLeo;});
+  if(!hayFueraLeoHdr){
+    var idxDatos=formHtml.indexOf('<span class="sl">Datos del cliente</span>');
+    var insertPoint=idxDatos>=0?formHtml.lastIndexOf('<div class="fsec">',idxDatos):-1;
+    if(insertPoint>=0){
+      formHtml=formHtml.slice(0,insertPoint)+rpocHeader+formHtml.slice(insertPoint);
+    } else {
+      var idxContent=formHtml.indexOf('<div class="content">');
+      if(idxContent>=0){
+        var afterContent=formHtml.indexOf('>',idxContent)+1;
+        formHtml=formHtml.slice(0,afterContent)+rpocHeader+formHtml.slice(afterContent);
+      }
+    }
   }
 
   // Bloque inferior: Admin si soloAdmin, SGI si fueraLeo
