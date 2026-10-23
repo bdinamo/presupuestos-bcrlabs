@@ -780,7 +780,7 @@ function diffVersiones(vieja,nueva){
     ['validoHasta','Válido hasta'],['tarifa','Tarifa'],['diasEntrega','Días de entrega'],
     ['bonifG','Bonificación general'],['rpocTipo','Tipo RPOC'],['codigoRojo','Código Rojo (urgencia)'],
     ['estado','Estado'],['elaboro','Elaboró'],['reviso','Revisó'],['aprobo','Aprobó'],
-    ['reqEspeciales','Requerimientos especiales del cliente'],
+    ['reqEspeciales','Requerimientos especiales del cliente'],['rpocAdmin','RPOC administrativa'],
   ];
   camposSimples.forEach(function(c){
     var k=c[0],label=c[1];
@@ -848,7 +848,7 @@ function renderRPOC(){
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
       <span class="sl" style="color:#8b5cf6;margin:0;">REVISIÓN DE PEDIDOS, OFERTAS Y CONTRATOS</span>
       <div style="display:flex;gap:6px;margin-left:auto;">
-        <span style="padding:2px 10px;border-radius:8px;border:1px solid #8b5cf6;background:#8b5cf6;color:#fff;font-size:11px;font-weight:600;">Tec+Admin</span>
+        <span style="padding:2px 10px;border-radius:8px;border:1px solid #8b5cf6;background:#8b5cf6;color:#fff;font-size:11px;font-weight:600;">${doc.rpocAdmin?'Administrativa':'Tec+Admin'}</span>
       </div>
     </div>
     <div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Motivos</div>
@@ -2052,6 +2052,13 @@ function renderForm(){
         <div><label>Teléfono</label><input class="f" id="f-tel" value="${doc.telefono}" data-fk="tel" data-df="telefono"></div>
         <div><label>E-mail</label><input class="f" type="text" id="f-email" value="${doc.email}" data-fk="" data-df-blur="email" placeholder="ejemplo@dominio.com"></div>
       </div>
+    ${(function(){
+      var puede=!APP.readOnly&&(doc.estado||'borrador')==='borrador';
+      if(!puede&&!doc.rpocAdmin)return '';
+      return '<label style="display:flex;align-items:center;gap:7px;margin:0 0 10px;padding:7px 10px;border:1px solid '+(doc.rpocAdmin?'#8b5cf6':'#e5e7eb')+';border-radius:6px;background:'+(doc.rpocAdmin?'#f5f3ff':'#fafafa')+';font-size:11px;'+(puede?'cursor:pointer;':'')+'">'
+        +'<input type="checkbox" data-rpoc-admin '+(doc.rpocAdmin?'checked ':'')+(puede?'':'disabled ')+'style="accent-color:#8b5cf6;cursor:pointer;">'
+        +'<span><b>RPOC administrativa</b> (sin ensayos LEO) — se elige el motivo y no hace falta cargar ensayos ni bonificación</span></label>';
+    })()}
     <span class="sl">Ensayos</span>
     <div class="ens-tbl-scroll" style="border:0.5px solid #d1d5db;border-radius:8px;margin-bottom:.85rem;overflow-x:auto;overflow-y:hidden;">
       <table class="ens-tbl">
@@ -2371,6 +2378,10 @@ function bindForm(){
   document.querySelectorAll('[data-df-blur]').forEach(function(el){el.addEventListener('blur',function(){APP.form[el.dataset.dfBlur]=el.value;});el.addEventListener('change',function(){APP.form[el.dataset.dfBlur]=el.value;});});
   document.querySelectorAll('[data-dr]').forEach(function(el){el.addEventListener('input',function(){APP.form[el.dataset.dr]=el.type==='number'?Number(el.value):el.type==='checkbox'?el.checked:el.value;render();});});
   document.querySelectorAll('[data-dr]').forEach(function(el){el.addEventListener('change',function(){if(el.type==='checkbox'){APP.form[el.dataset.dr]=el.checked;render();}});});
+  document.querySelectorAll('[data-rpoc-admin]').forEach(function(el){el.addEventListener('change',function(){
+    if(el.checked){activarRPOCAdmin();}else{desactivarRPOCAdmin();}
+    render();
+  });});
   document.querySelectorAll('[data-motivo]').forEach(function(el){el.addEventListener('change',function(){
     if(!APP.form.rpocMotivos)APP.form.rpocMotivos=[];
     var k=el.dataset.motivo;
@@ -2475,7 +2486,11 @@ function validarDoc(accion){
   }
 
   // ── RPOC solo Admin: PR → Solicitar revisión Adm ────────────────────────
-  if(accion==='solicitar-rev-adm'){
+  if(accion==='solicitar-rev-adm'&&doc.rpocAdmin){
+    // RPOC administrativa: sin ensayos ni bonificación; exige al menos un motivo
+    validarBase();
+    if(!(doc.rpocMotivos&&doc.rpocMotivos.length)) errores.push('• Debe elegir al menos un motivo de la RPOC');
+  } else if(accion==='solicitar-rev-adm'){
     validarBase();
     if(!tieneAlgunEnsayo) errores.push('• Debe tener al menos un ensayo cargado');
     // Verificar que todos los ensayos LEO tienen bonificación definida (campo bonifG o por fila)
@@ -2515,7 +2530,7 @@ async function saveDoc(){
   var eraRpoc=APP.form.tipo==='RPOC';
 
   // ── Determinar tipo PR / RPOC ──
-  if(tieneFueraLeo||APP.form.solicitarRevAdm){
+  if(tieneFueraLeo||APP.form.solicitarRevAdm||APP.form.rpocAdmin){
     APP.form.tipo='RPOC';
     if(!APP.form.numero||APP.form.numero.startsWith('PR')){
       APP.form.numero=nextRPOCNumero();
@@ -2983,7 +2998,39 @@ function convertirAPROCSiHaceFalta(){
   }
   alert('Este ensayo tiene una bonificación cargada, así que el documento pasó automáticamente a RPOC (antes: '+numeroViejo+').\nNuevo número: '+APP.form.numero);
 }
+function activarRPOCAdmin(){
+  var f=APP.form;
+  var numeroViejo=f.numero;
+  f.rpocAdmin=true;
+  f.solicitarRevAdm=true;   // flujo solo Administración (sin SGI)
+  f.rpocTipo='admin';
+  if(!f.rpocMotivos)f.rpocMotivos=[];
+  if(f.tipo!=='RPOC'){
+    f.tipo='RPOC';
+    if(f.rpocDescripcion===undefined)f.rpocDescripcion='';
+    if(f.revAdminNombre===undefined){f.revAdminNombre='';f.tsRevAdmin='';f.revAdminNota='';}
+    if(f.revCalidadNombre===undefined){f.revCalidadNombre='';f.tsRevCalidad='';f.revCalidadNota='';}
+    if(f.aproboNombre===undefined){f.aproboNombre='';f.tsAprobo='';}
+    if(!/^RPOC /.test(f.numero||''))f.numero=nextRPOCNumero();
+    alert('El documento pasó a RPOC administrativa (antes: '+numeroViejo+').\nNuevo número: '+f.numero+'\nElegí el motivo; no hace falta cargar ensayos.');
+  }
+}
+function desactivarRPOCAdmin(){
+  var f=APP.form;
+  f.rpocAdmin=false;
+  var tieneFueraLeo=(f.rows||[]).some(function(r){return r.fueraLeo;});
+  var hayBonifLEO=(f.rows||[]).some(function(r){return r.eid&&!r.fueraLeo&&Number(r.bonif)>0;});
+  if(tieneFueraLeo||hayBonifLEO)return; // sigue siendo RPOC por otro motivo
+  var numeroViejo=f.numero;
+  f.solicitarRevAdm=false;
+  f.rpocTipo='tecnica';
+  f.tipo='PR';
+  f._autoRPOC=false;
+  if(!/^PR /.test(f.numero||''))f.numero=nextPRNumero();
+  alert('Se quitó la marca de RPOC administrativa: el documento volvió a PR (antes: '+numeroViejo+').\nNuevo número: '+f.numero);
+}
 function revertirAPRSiHaceFalta(){
+  if(APP.form.rpocAdmin)return; // RPOC administrativa marcada a mano: no se revierte sola
   if(APP.form.tipo!=='RPOC'||!APP.form._autoRPOC)return;
   var hayBonifLEO=(APP.form.rows||[]).some(function(r){return r.eid&&!r.fueraLeo&&Number(r.bonif)>0;});
   if(hayBonifLEO)return;
