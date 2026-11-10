@@ -362,11 +362,20 @@ const fmtDT=d=>{const dt=new Date(d);return dt.toLocaleDateString('es-AR',{day:'
 // --- Fin definiciones base recuperadas ---
 
 const getE=id=>id?EN_ALL.find(e=>e.id===Number(id)):null;
+// Precio OGM vigente según TablaConfiguracion (base + (n-1)*adicional). eid 1000=cualitativo, 1001=cuantitativo.
+function gmPrecioVigente(r){
+  var n=Number(r.gm_n);
+  if(!n){ var m=/^Eventos:\s*(.*?)(?:\s·\s*Nivel|$)/.exec(r.gm_desc||''); n=m&&m[1]?m[1].split(',').filter(function(x){return x.trim();}).length:0; }
+  if(!n||(Number(r.eid)!==1000&&Number(r.eid)!==1001)) return r.gm_precio;
+  var cual=Number(r.eid)===1000;
+  return (cual?GM_PRECIO_CUALIT_BASE:GM_PRECIO_CUANTIT_BASE)+(n-1)*(cual?GM_PRECIO_CUALIT_ADIC:GM_PRECIO_CUANTIT_ADIC);
+}
 function unitPriceNow(r,tarifa){
   if(r.precioManual!=null) return r.precioManual;
   const e=getE(r.eid);
   if(!e&&!r.fueraLeo) return 0;
-  return r.gm_precio!==undefined?r.gm_precio:(e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0);
+  if(r.gm_precio!==undefined){ var g=gmPrecioVigente(r); if(g!==undefined&&!isNaN(g)) r.gm_precio=g; return r.gm_precio; }
+  return e?(tarifa==='consorcio'&&e.pc?e.pc:e.p):0;
 }
 function dedupTecnica(texto){
   if(!texto) return texto;
@@ -712,7 +721,7 @@ function renderModalGM(tipo,mat){
     var nivel=esCualit?' \u00b7 Nivel det.: '+(GM_NIVEL_DET||'0,1%'):' \u00b7 Nivel cuant.: 0,1%';
     var tec='LPE.0027 PCR en Tiempo Real';
     var gm_desc='Eventos: '+GM_SEL_EVENTOS.join(', ')+nivel;
-    var r=mkRow();r.eid=eid;r.tec=tec;r.gm_desc=gm_desc;r.mat1=mat;r.matriz=mat;r.gm_precio=precio;
+    var r=mkRow();r.eid=eid;r.tec=tec;r.gm_desc=gm_desc;r.mat1=mat;r.matriz=mat;r.gm_precio=precio;r.gm_n=nSel2;
     if(APP.form.rows.length===1&&!APP.form.rows[0].eid){APP.form.rows[0]=Object.assign(APP.form.rows[0],r);}
     else{APP.form.rows.push(r);}
     var rowsCopy=JSON.parse(JSON.stringify(APP.form.rows));
